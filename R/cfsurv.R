@@ -1,3 +1,11 @@
+#' Conformalized survival analysis
+#'
+#' The main function to construct a predictive confidence interval 
+#' for the survival time
+#' @param x the covariate for prediction point
+#' @param r the censoring time for the prediction point
+#'
+
 # function to construct conformal confidence interval
 cfsurv <- function(x,r,data,alpha=0.05,seed = 24601,dist= "weibull"){
   fit <- quantreg_model(data,dist,seed)
