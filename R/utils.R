@@ -182,16 +182,18 @@ check_coverage <-  function(res,T,R,limit=TRUE){
 
 }
 
-
+#' check_lower_coverage
+#'
+#' @param 
 check_coverage_lower <-  function(res,T,R){
   cover <- 0
   n <- length(R)
   for(i in 1:n){
-    statement  <-  (T[i]>=res[i,]$ci_low)*(T[i]<=R[i])
+    statement  <-  (T[i]>=res[,i]$ci_low)*(T[i]<=R[i])
     if(statement){
         cover = cover+1
     }else{
-      if(res[i,]$includeR == 1 & (T[i]>R[i])){
+      if(res[,i]$includeR == 1 & (T[i]>R[i])){
         cover = cover+1
       }
     }
@@ -202,31 +204,6 @@ check_coverage_lower <-  function(res,T,R){
 
 }
 
-
-check_conditional_coverage <-  function(res,T,R,r,limit=TRUE){
-  cover <- 0
-  n <- length(R)
-  for(i in 1:n){
-    if(limit){ 
-      statement  <-  (T[i]<=res[[i]]$ci_upp)&(T[i]>=res[[i]]$ci_low)
-    }else{
-      statement <- (T[i]%in%res[[i]]$CI)
-    }
-    if(R[i]==r){
-    if(statement){
-        cover = cover+1
-    }else{
-      if(res[[i]]$includeR == 1 & (T[i]>=R[i])){
-        cover = cover+1
-      }
-    }
-    }
-  }
-
-  cover <- cover/sum(R==r)
-  return(cover)
-
-}
 
 plot_coverage <- function(cover,
                           alpha_list,
