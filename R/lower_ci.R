@@ -29,11 +29,12 @@ lower_ci <- function(mdl,x,r,alpha,data){
                  type="quantile",
                  p=alpha)
   new_quant_lo <-  res
-  corr_term <- quantile(c(score,Inf),1-alpha)
+  corr_term <- quantile(c(score,Inf),1-alpha,type=1)
   extra_noise <- rnorm(1,0,sigma_noise)
   ci_low <- min(new_quant_lo,r)-corr_term+extra_noise
-  ci_low <- pmin(ci_low,r-1)
+  ci_low <- pmin(ci_low,r)
   ci_low <- pmax(ci_low,0)
   includeR <- ifelse(min(new_quant_lo,r)-r+extra_noise<=corr_term,1,0)
-  return(list(ci_low=ci_low,includeR = includeR,corr_term = corr_term))
+  ##   return(list(ci_low=ci_low,includeR = includeR,corr_term = corr_term))
+  return(list(ci_low=ci_low,includeR = includeR))
 }

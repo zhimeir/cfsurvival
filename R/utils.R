@@ -103,7 +103,8 @@ if(lower_only){
                    y_max=r,
                    y_min = low_ci,
                    CI_level = as.factor(rep(alpha_list,each=length(x_base))))
-pp <- ggplot(data = df,aes(x=x,ymin=y_min,ymax=y_max,group = CI_level,col = CI_level))+
+
+  pp <- ggplot(data = df,aes(x=x,ymin=y_min,ymax=y_max,group = CI_level,col = CI_level))+
   #geom_point(size = 1,shape=17)+
   #geom_line()+
   geom_ribbon(alpha=0.1)+
@@ -186,11 +187,11 @@ check_coverage_lower <-  function(res,T,R){
   cover <- 0
   n <- length(R)
   for(i in 1:n){
-    statement  <-  (T[i]>=res[[i]]$ci_low)*(T[i]<R[i])
+    statement  <-  (T[i]>=res[i,]$ci_low)*(T[i]<=R[i])
     if(statement){
         cover = cover+1
     }else{
-      if(res[[i]]$includeR == 1 & (T[i]>=R[i])){
+      if(res[i,]$includeR == 1 & (T[i]>R[i])){
         cover = cover+1
       }
     }

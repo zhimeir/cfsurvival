@@ -36,7 +36,7 @@ lower_ci_local <- function(mdl,x,r,data,alpha,h=1){
   corr_term <- sort_score[idxw]
   extra_noise <- rnorm(1,0,sigma_noise)
   ci_low <- min(new_quant_lo,r)-corr_term+extra_noise
-  ci_low <- pmin(ci_low,r-1)
+  ci_low <- pmin(ci_low,r)
   ci_low <- pmax(ci_low,0)
   includeR <- ifelse(min(r,new_quant_lo)-r+extra_noise<=corr_term,1,0)
   return(list(ci_low=ci_low,includeR = includeR,corr_term = corr_term))
