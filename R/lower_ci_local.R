@@ -9,23 +9,34 @@
 #' @param h bandwidth (default: 1)
 #' @export
 
-lower_ci_local <- function(mdl,x,r,data,alpha,h=1){
+lower_ci_local <- function(x,r,alpha,
+                           data,
+                           h,
+                           mdl=NULL,
+                           quant_lo=NULL,
+                           new_quant_lo=NULL){
   n <- dim(data)[1]
+  len_x <- length(x)
+
+  if(is.null(quant_lo)){
   res <- predict(mdl,
                  newdata = data.frame(X=data$X),
                  type="quantile",
                  p=alpha)
   quant_lo <-  res
+  }
   
   ## calibration
   sigma_noise <- 1e-6
   score <-  pmin(quant_lo,data$R)-data$censored_T+rnorm(n,0,sigma_noise)
  
+  if(is.null(new_quant_lo)){
   res <- predict(mdl,
                  newdata = data.frame(X=x),
                  type="quantile",
                  p=alpha)
   new_quant_lo <-  res
+  }
 
   w <- get_weight_r(data,h,r,r)
   score_vec <- c(score,Inf)
@@ -34,11 +45,11 @@ lower_ci_local <- function(mdl,x,r,data,alpha,h=1){
   sort_w <- w[order_score]
   idxw <- min(which(cumsum(sort_w)>=1-alpha))
   corr_term <- sort_score[idxw]
-  extra_noise <- rnorm(1,0,sigma_noise)
-  ci_low <- min(new_quant_lo,r)-corr_term+extra_noise
+  extra_noise <- rnorm(len_x,0,sigma_noise)
+  ci_low <- pmin(new_quant_lo,r)-corr_term+extra_noise
   ci_low <- pmin(ci_low,r)
   ci_low <- pmax(ci_low,0)
-  includeR <- ifelse(min(r,new_quant_lo)-r+extra_noise<=corr_term,1,0)
+  includeR <- ifelse(pmin(r,new_quant_lo)-r+extra_noise<=corr_term,1,0)
   return(list(ci_low=ci_low,includeR = includeR,corr_term = corr_term))
 }
 

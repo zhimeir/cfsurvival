@@ -16,12 +16,19 @@ cfsurv <- function(x,r,data,
                    model = "cox",
                    dist= "weibull",
                    h=NULL){
+  ## Check if the required packages are installed
+  ##   list.of.packages <- c("ggplot2", "grf", "quantregForest", "randomForestSRC", "survival")
+  ##   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+  ##   if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
+
   ## Process the input
   len_r <- length(r)
   len_x <- length(x)
   if(len_r>1 & len_r!=len_x){
     stop("The length of R is not compatible with that of X!")
   }
+
+  if(model %in% c("cox","randomforest")==0) stop("The regression method is not supported.")
 
   ## set random seed
   set.seed(seed)
@@ -33,51 +40,25 @@ cfsurv <- function(x,r,data,
   I_fit <- sample(1:n,n_train,replace = FALSE)
   data_fit <- data[I_fit,]
   data_calib <- data[-I_fit,] 
-
-  mdl <- fit_model(data_fit,
-                   model=model, 
-                   dist = dist)
   
-  ## obtain final confidence interval
-  if(type == "marginal"){
-    if(len_r == 1){
-    res <- sapply(x,lower_ci,
-                mdl=mdl,
-                r=r,
-                alpha=alpha,
-                data = data_calib)
-    return(res)
-    }else{
-    if(len_r == len_x){
-      res <- map2(x,
-                  r,
-                  lower_ci,
-                  mdl=mdl,
-                  alpha=alpha,
-                  data=data_calib)
-    return(res)
-    } 
+  ## Run the main function and gather resutls
+  if(model == "cox"){
+    res = cox_based(x,r,alpha,
+                    data_fit,
+                    data_calib,
+                    type,
+                    dist,
+                    h)
    }
+  if(model == "randomforest"){
+    res = rf_based(x,r,alpha,
+                   data_fit,
+                   data_calib,
+                   type,
+                   h)
   }
-    if(type == "local"){
-      if(len_r == 1){
-        res <- sapply(x,lower_ci_local,
-                      mdl=mdl,
-                      r=r,
-                      alpha=alpha,
-                      data=data_calib,
-                      h=h)
-        return(res)
-      }else{
-      res <- map2(x,
-                  r,
-                  lower_ci_local,
-                  mdl=mdl,
-                  alpha=alpha,
-                  data=data_calib,
-                  h=h)
-      return(res)
-      }
-    }
+  return(res)
+
+  
 }
 

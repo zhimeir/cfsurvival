@@ -4,7 +4,7 @@
 \alias{fit_model}
 \title{Fit the model to estimate the quantile of survival time}
 \usage{
-fit_model(data, model = "cox", dist = "weibull")
+fit_model(data, alpha = NULL, model = "cox", dist = "weibull")
 }
 \arguments{
 \item{data}{data frame used to fit the quantile regression model. It should contain (X,R,censoredT)}

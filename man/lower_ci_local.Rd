@@ -4,20 +4,29 @@
 \alias{lower_ci_local}
 \title{lower_ci_local}
 \usage{
-lower_ci_local(mdl, x, r, data, alpha, h = 1)
+lower_ci_local(
+  x,
+  r,
+  alpha,
+  data,
+  h,
+  mdl = NULL,
+  quant_lo = NULL,
+  new_quant_lo = NULL
+)
 }
 \arguments{
-\item{mdl}{the fitted moodel}
-
 \item{x}{covariate of the prediction point. Can be a point or a vector}
 
 \item{r}{observe time of the prediction point. Can be point or a vector. When it is a vector, its length should match the length of x.}
 
-\item{data}{data frame containing the calibration data}
-
 \item{alpha}{construct a level 1-alpha confidence interval}
 
+\item{data}{data frame containing the calibration data}
+
 \item{h}{bandwidth (default: 1)}
+
+\item{mdl}{the fitted moodel}
 }
 \description{
 A function to compute the local lower bound of the survival time

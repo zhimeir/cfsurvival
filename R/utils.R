@@ -1,7 +1,16 @@
 ####################
 ### plot the data ##
 ####################
-#plot the raw data
+#' plot_raw
+#'
+#' An internal function to plot the raw data
+#'
+#' @param data The data frame to be plotted. Consists (X,R,censored_T).
+#' @param dir outpu directory.
+#' @param plot a logical value indicating if plotting the figure in teh interactive session.
+#' @param hist a logical value indicating if plotting the histogram.
+#' @export
+
 plot_raw <- function(data,dir,plot =FALSE,hist=FALSE){
 
 # plot the uncensored T
@@ -19,6 +28,11 @@ filename <- sprintf("%s/histT.pdf",dir)
 ggsave(filename,phist,width=8,height=3)
 
 # plot censored T
+data <- data%>%
+  rename(type = event)%>%
+  mutate(type=ifelse(type==TRUE,
+                     "censored",
+                     "not censored"))
 pchist <- ggplot(data,aes(x=censored_T))+
   geom_histogram()+
   theme_bw()+
@@ -32,12 +46,12 @@ filename <- sprintf("%s/histT_censored.pdf",dir)
 ggsave(filename,pchist,width=8,height=3)
 }
 ## plot the true data and the censored data
-pp <- ggplot(data)+geom_point(aes(x=X,y=censored_T,col = event),size=.5,alpha=.3)+
+pp <- ggplot(data)+geom_point(aes(x=X,y=censored_T,col = type),size=.5,alpha=.3)+
   theme_bw()+
   xlab("X")+
   ylab("Censored_T")+
   ggtitle("Censored time versus X")+
-  ylim(c(0,max(data$censored_T)+40))+
+  ylim(c(0,max(data$censored_T)*1.5))+
   scale_color_manual(values = c("gray","red"))+
   theme(
     legend.position = c(0.9,0.8)
@@ -102,19 +116,21 @@ if(lower_only){
   df <- data.frame(x = rep(x_base,times=length(alpha_list)),
                    y_max=r,
                    y_min = low_ci,
-                   CI_level = as.factor(rep(alpha_list,each=length(x_base))))
+                   CI_level = as.factor(rep(alpha_list,each=length(x_base))),
+                   title = sprintf("%s:r=%d",method_name,r))
 
   pp <- ggplot(data = df,aes(x=x,ymin=y_min,ymax=y_max,group = CI_level,col = CI_level))+
   #geom_point(size = 1,shape=17)+
   #geom_line()+
   geom_ribbon(alpha=0.1)+
   theme_bw()+
-  ggtitle(paste0(method_name,":r=",as.character(r)))+
   ylab("Survival time confidence interval")+
   theme(
     axis.text = element_text(size=15),
-    title = element_text(size=15,face="bold")
+    strip.text = element_text(size=15),
+    title = element_text(size=15)
   )+
+  facet_grid(.~title)+
   ylim(c(0,r))
 }else{
 df <- data.frame(x = rep(x_base,times=length(alpha_list)),y_max=upp_ci,y_min = low_ci,CI_level = as.factor(rep(alpha_list,each=length(x_base))))
@@ -138,6 +154,11 @@ ggsave(filename,pp,width=10,height=5)
 ##############################
 ### generate weibull T #######
 ##############################
+#' generate_weibull
+#'
+#' A generic function to generate survival data generated from a cox model
+#'
+#' @export
 generate_weibull <- function(n,a,b,beta,Rmax,seed,info=FALSE){
   set.seed(seed)
   X      <- runif(n,0,0.5)       # covariate

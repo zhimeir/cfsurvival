@@ -5,11 +5,17 @@
 \title{lower_ci
 construct the one-sided confidence interval for T}
 \usage{
-lower_ci(mdl, x, r, alpha, data)
+lower_ci(
+  x,
+  r,
+  alpha,
+  data = data,
+  mdl = NULL,
+  quant_lo = NULL,
+  new_quant_lo = NULL
+)
 }
 \arguments{
-\item{mdl}{The fitted model}
-
 \item{x}{The covariate of the prediction point}
 
 \item{r}{The observe time of the prediction point}
@@ -17,6 +23,8 @@ lower_ci(mdl, x, r, alpha, data)
 \item{alpha}{level}
 
 \item{data}{data frame}
+
+\item{mdl}{The fitted model}
 }
 \description{
 lower_ci
