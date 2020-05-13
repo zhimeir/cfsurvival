@@ -28,11 +28,6 @@ filename <- sprintf("%s/histT.pdf",dir)
 ggsave(filename,phist,width=8,height=3)
 
 # plot censored T
-data <- data%>%
-  rename(type = event)%>%
-  mutate(type=ifelse(type==TRUE,
-                     "censored",
-                     "not censored"))
 pchist <- ggplot(data,aes(x=censored_T))+
   geom_histogram()+
   theme_bw()+
@@ -46,25 +41,32 @@ filename <- sprintf("%s/histT_censored.pdf",dir)
 ggsave(filename,pchist,width=8,height=3)
 }
 ## plot the true data and the censored data
+data <- data%>%
+  rename(type = event)%>%
+  mutate(type=ifelse(type==TRUE,
+                     "censored",
+                     "not censored"))
+data$title <- "Censored T"
 pp <- ggplot(data)+geom_point(aes(x=X,y=censored_T,col = type),size=.5,alpha=.3)+
   theme_bw()+
   xlab("X")+
   ylab("Censored_T")+
-  ggtitle("Censored time versus X")+
-  ylim(c(0,max(data$censored_T)*1.5))+
+  ylim(c(0,max(data$censored_T)*2))+
   scale_color_manual(values = c("gray","red"))+
   theme(
     legend.position = c(0.9,0.8)
-  )
+  )+
+facet_grid(.~title)
 if(plot){print(pp)}
 filename <- sprintf("%s/censoredT.pdf",dir)
 ggsave(filename,plot=pp,width=7,height=3)
 
+data$title <- "Uncensored T"
 pp <- ggplot(data)+geom_point(aes(x=X,y=T),size=.3)+
   theme_bw()+
   xlab("X")+
   ylab("T")+
-  ggtitle("Uncensored time versus X")
+  facet_grid(.~title)
 if(plot){print(pp)}
 filename <- sprintf("%s/T.pdf",dir)
 ggsave(filename,plot=pp,width=7,height=3)
@@ -241,7 +243,7 @@ pp <- ggplot(df,aes(x=x,y=y))+
   theme_bw()+
   ##   scale_color_manual(values = c("blue","red"))+
   xlim(c(min(alpha_list),max(alpha_list)))+
-  ylim(c(min(cover),max(cover)))+
+  ylim(c(min(min(cover),min(alpha_list)),max(max(cover),max(alpha_list))))+
   ylab("Covering prob.")+
   xlab("Target level")
 if(plot){print(pp)}

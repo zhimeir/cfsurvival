@@ -13,15 +13,25 @@ cfsurv(
   seed = 24601,
   model = "cox",
   dist = "weibull",
-  h = NULL
+  h = 1
 )
 }
 \arguments{
-\item{x}{the covariate for prediction point}
+\item{x}{the covariate for prediction point. (Currently only one-dimensional.)}
 
-\item{r}{the censoring time for the prediction point}
+\item{r}{the censoring time for the prediction point.}
 
-\item{data}{the data frame (X,R,censoredT)}
+\item{data}{a data frame containing the training data. It should contain four columns: (X,R,event,censoredT). X is the covariate; R is the censoring tim;, event is the indicator if T<=R; censored_T is the censored survial time, i.e., the minimum of T and R.}
+
+\item{alpha}{The miscoverage rate.}
+
+\item{seed}{The random seed. Default is 24601.}
+
+\item{model}{The model used to fit the quantile. Choices include "cox" and "randomforest". Default is "cox".}
+
+\item{dist}{The distribution of T used in the cox model. Choices include "weibull", "exponential" and "gaussian". Default is "weibull".}
+
+\item{h}{The bandwidth for the local confidence interval. Default is 1.}
 }
 \description{
 The main function to generate a predictive conformal confidence interval for a unit's survival time.

@@ -2,9 +2,14 @@
 #'
 #' The main function to generate a predictive conformal confidence interval for a unit's survival time.
 #'
-#' @param x the covariate for prediction point
-#' @param r the censoring time for the prediction point
-#' @param data the data frame (X,R,censoredT)
+#' @param x the covariate for prediction point. (Currently only one-dimensional.)
+#' @param r the censoring time for the prediction point.
+#' @param data a data frame containing the training data. It should contain four columns: (X,R,event,censoredT). X is the covariate; R is the censoring tim;, event is the indicator if T<=R; censored_T is the censored survial time, i.e., the minimum of T and R.
+#' @param alpha The miscoverage rate.
+#' @param seed The random seed. Default is 24601.
+#' @param model The model used to fit the quantile. Choices include "cox" and "randomforest". Default is "cox".
+#' @param dist The distribution of T used in the cox model. Choices include "weibull", "exponential" and "gaussian". Default is "weibull".
+#' @param h The bandwidth for the local confidence interval. Default is 1.
 #' @export
 
 
@@ -15,20 +20,38 @@ cfsurv <- function(x,r,data,
                    seed = 24601,
                    model = "cox",
                    dist= "weibull",
-                   h=NULL){
+                   h=1){
   ## Check if the required packages are installed
-  ##   list.of.packages <- c("ggplot2", "grf", "quantregForest", "randomForestSRC", "survival")
-  ##   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-  ##   if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
+  ## Solution found from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them  
+  list.of.packages <- c("ggplot2", "grf", "quantregForest", "randomForestSRC", "survival","tidyverse")
+  new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+  if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
+  suppressPackageStartupMessages(res <- lapply(X=list.of.packages,FUN=require,character.only=TRUE))
 
   ## Process the input
+  ## Check the length of x and r: only two cases are supported. length(r)=1, or length(r)=length(x)
   len_r <- length(r)
   len_x <- length(x)
   if(len_r>1 & len_r!=len_x){
     stop("The length of R is not compatible with that of X!")
   }
 
-  if(model %in% c("cox","randomforest")==0) stop("The regression method is not supported.")
+  ## Check the type of the model. Only "cox" and "randomforest" are supported
+  if(model %in% c("cox","randomforest")==0) stop("The regression model is not supported.")
+
+  ## Check the type of the confidence inteval
+  if(type %in% c("marginal","local")==0) stop("The type of confidence interval is not supported.")
+
+  ## Check the value of alpha
+  if (alpha>=1 | alpha<=0) stop("The value of alpha is out of bound.")
+  
+  ## Check the columns of the data frame
+  if(!is.data.frame(data))stop("data should be a data frame.")
+  check_columnname <- "X"%in%names(data)& 
+     "R"%in%names(data)&
+     "event"%in%names(data)&
+     "censored_T"%in%names(data)
+  if(!check_columnname)stop("The columns in data are not correct. Please check the document.")
 
   ## set random seed
   set.seed(seed)
