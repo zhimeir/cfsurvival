@@ -2,8 +2,7 @@
 % Please edit documentation in R/lower_ci.R
 \name{lower_ci}
 \alias{lower_ci}
-\title{lower_ci
-construct the one-sided confidence interval for T}
+\title{lower_ci}
 \usage{
 lower_ci(
   x,
@@ -20,13 +19,16 @@ lower_ci(
 
 \item{r}{The observe time of the prediction point}
 
-\item{alpha}{level}
+\item{alpha}{The miscaverage rate.}
 
-\item{data}{data frame}
+\item{data}{A data frame used for calibration. Should contain four columns: (X,R,event,censored_T).}
 
-\item{mdl}{The fitted model}
+\item{mdl}{The fitted model to estimate the conditional quantile. The default is NULL.}
+
+\item{quant_lo}{The fitted conditional quantile for the calibration data.}
+
+\item{new_quant_lo}{The fitted conditional quantile for the tprediction data.}
 }
 \description{
-lower_ci
-construct the one-sided confidence interval for T
+construct the one-sided confidence interval for a unit's survival time T
 }

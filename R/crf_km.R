@@ -1,26 +1,9 @@
 #' crf.km
 #'
-#' A function from https://github.com/AlexanderYogurt/censored_ExtremelyRandomForest
-#' to perform censored quantile random forest. It is slightly modified.
+#' The function is based on the scripts from https://github.com/AlexanderYogurt/censored_ExtremelyRandomForest to perform censored quantile random forest. 
 #'
 #' @export
 
-## source("metrics.R")
-## source("help_functions.R")
-## source("Csurv.R")
-## source("crf.R")
-## source("cranger.R")
-## source("cgrf.R")
-## library(fishmethods)
-## 
-## list.of.packages <- c("survival", "randomForest", "ranger", "grf")
-## new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-## if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
-## 
-## library(survival)
-## library(randomForest)
-## library(ranger)
-## library(grf)
 
 crf.km <- function(fmla, ntree, 
                    nodesize,
@@ -125,4 +108,133 @@ crf.km <- function(fmla, ntree,
       'proxMtx'=proxMtx
     )
   )
+}
+
+#' C.surv
+#'
+#' An internal function for censored quantile random forest
+#'
+#' @export
+C.surv <- function(q, Y, base) {
+  result <- prod(base[Y <= q])
+  return(result)
+}
+
+
+#' grf.getWeights
+#'
+#' An internal function for censored quantile random forest
+#'
+#' @export
+grf.getWeights = function(grf, testdata, y_name, c_name, x_name=NULL) {
+  
+  if (is.null(x_name)){
+    weights <- get_sample_weights(grf, newdata=testdata[ ,!(names(testdata) %in% c(y_name, c_name)), drop=F]) 
+  } else {
+    weights <- get_sample_weights(grf, newdata=testdata[ ,x_name])
+  }
+  
+  return (weights)
+}
+
+
+#' rf.getNodes
+#'
+#' An internal function for censored quantile random forest
+#'
+#' @export
+rf.getNodes = function(rf, data, y_name, c_name) {
+  pred = predict(rf, data[ ,!(names(data) %in% c(y_name, c_name)), drop=F], nodes = T)
+  nodes = attributes(pred)$nodes
+
+  return(nodes)
+}
+
+
+#' rf.getWeights
+#'
+#' An internal function for censored quantile random forest
+#'
+#' @export
+rf.getWeights = function(rf, traindata, testdata, y_name, c_name) {
+  cores=detectCores()
+  cl <- makeCluster(cores[1]-1) #not to overload your computer
+  cat("number of cores: ", cores[1]-1)
+  registerDoParallel(cl)
+
+  # retrieve training nodes
+  nodes = rf.getNodes(rf, traindata, y_name, c_name) # [train.samples, trees]
+
+  # retrieve nodes for test data
+  test.nodes = rf.getNodes(rf, testdata, y_name, c_name) # [test.samples, trees]
+  nodesize = test.nodes # [test.samples, trees]
+
+  # loop over trees
+  print("loop begins...\n")
+  ntrees = rf$ntree
+  weights <- foreach(k=1:ntrees, .combine='+') %dopar% {
+      in.leaf = 1*outer(test.nodes[,k],nodes[,k],'==') # [test.samples, train.samples] indicates whether a test and a train data are in the same leaf node
+      mapping=plyr::count(nodes[,k])
+      nodesize[,k] = plyr::mapvalues(test.nodes[,k], from=mapping$x, to=mapping$freq, warn_missing=F)
+      weight = in.leaf / nodesize[,k]
+      weight
+  }
+  stopCluster(cl)
+
+  return(weights/ntrees)
+}
+
+
+#' ranger.getNodes
+#'
+#' An internal function for censored quantile random forest
+#'
+#' @export
+ranger.getNodes = function(rg, data, y_name, c_name, x_name=NULL) {
+  if (is.null(x_name)) {
+    pred = predict(rg, data[ ,!(names(data) %in% c(y_name, c_name)), drop=F], type = "terminalNodes")
+  } else {
+    pred = predict(rg, data[ ,x_name], type = "terminalNodes")
+  }
+  nodes = pred$predictions
+
+  return(nodes)
+}
+
+
+#' ranger.getWeights
+#'
+#' An internal function for censored quantile random forest
+#'
+#' @export
+ranger.getWeights = function(rg, traindata, testdata, y_name, c_name, x_name=NULL) {
+  num_cores = detectCores() - 1 #not to overload your computer
+  cl <- makeCluster(num_cores, type="FORK")
+  cat("number of cores: ", num_cores)
+  registerDoParallel(cl)
+
+  # retrieve training nodes
+  #print("retrieving training node information...\n")
+  nodes = ranger.getNodes(rg, traindata, y_name, c_name, x_name) # [train.samples, trees]
+
+  # retrieve nodes for test data
+  #print("retrieving test node information...\n")
+  test.nodes = ranger.getNodes(rg, testdata, y_name, c_name, x_name) # [test.samples, trees]
+  nodesize = test.nodes # [test.samples, trees]
+
+  # loop over trees
+  print("loop begins...")
+  ntrees = rg$num.trees
+  weights <- foreach(k=1:ntrees, .combine='+') %dopar% {
+    in.leaf = 1*outer(test.nodes[,k],nodes[,k],'==') # [test.samples, train.samples] indicates whether a test and a train data are in the same leaf node
+    mapping = plyr::count(nodes[,k])
+    nodesize[,k] = plyr::mapvalues(test.nodes[,k], from=mapping$x, to=mapping$freq, warn_missing=F)
+    weight = in.leaf / nodesize[,k]
+    weight
+  }
+  
+  stopCluster(cl)
+  stopImplicitCluster()
+
+  return(weights/ntrees)
 }

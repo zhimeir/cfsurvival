@@ -50,7 +50,8 @@ lower_ci_local <- function(x,r,alpha,
   ci_low <- pmin(ci_low,r)
   ci_low <- pmax(ci_low,0)
   includeR <- ifelse(pmin(r,new_quant_lo)-r+extra_noise<=corr_term,1,0)
-  return(list(ci_low=ci_low,includeR = includeR,corr_term = corr_term))
+  ##   return(list(ci_low=ci_low,includeR = includeR,corr_term = corr_term))
+  return(list(ci_low=ci_low,includeR = includeR))
 }
 
 get_weight_r <- function(data,h,r0,r){

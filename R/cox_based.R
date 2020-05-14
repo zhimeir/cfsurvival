@@ -2,14 +2,20 @@
 #'
 #' Construct conformal prediction model based on cox model
 #'
-#' @param x the covariate of the prediction point
-#' @param r the observing time of the prediction point
-#' @param alpha level of confidence. The target is to contruct a level 1-alpha confidence interval
-#' @param data_fit traing data
-#' @param data_calib calibration data
-#' @param type type of confidence interval: marginal or local
-#' @param dist distribution of T
+#' @param x the covariate of the prediction point.
+#' @param r the censoring time of the prediction point.
+#' @param alpha Miscoverage rate.
+#' @param data_fit traing data.
+#' @param data_calib calibration data.
+#' @param type type of confidence interval: marginal or local.
+#' @param dist The distribution of T used in the cox model.
+#'
+#' @return ci_low The lower bound of survival time.
+#' @return includeR An indicator suggesting if [r,inf) is included in the confidence interval.
+#'
 #' @export
+#'
+#'
 
 cox_based <- function(x,r,alpha,
                       data_fit,

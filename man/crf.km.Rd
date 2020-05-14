@@ -23,6 +23,5 @@ crf.km(
 )
 }
 \description{
-A function from https://github.com/AlexanderYogurt/censored_ExtremelyRandomForest
-to perform censored quantile random forest. It is slightly modified.
+The function is based on the scripts from https://github.com/AlexanderYogurt/censored_ExtremelyRandomForest to perform censored quantile random forest.
 }

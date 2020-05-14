@@ -11,6 +11,24 @@
 #' @param dist The distribution of T used in the cox model. Choices include "weibull", "exponential" and "gaussian". Default is "weibull".
 #' @param h The bandwidth for the local confidence interval. Default is 1.
 #' @export
+#'
+#' @examples
+#' # Generate data
+#' n <- 500
+#' X <- runif(n,0,2)
+#' T <- exp(X+rnorm(n,0,1)) 
+#' R <- rexp(n,rate = 0.01)
+#' event <- T<=R
+#' censored_T <- pmin(T,R)
+#' data <- data.frame(X=X,R=R,evemt=event,censored_T=censored_T)
+#'
+#' # Prediction point
+#' x <- seq(0,2,by=.4)
+#' r <- 2
+#'
+#' # Run cfsurv
+#' res <- cfsurv(x,r,data,alpha=0.1,model="randomforest")
+#'
 
 
 # function to construct conformal confidence interval
@@ -23,7 +41,15 @@ cfsurv <- function(x,r,data,
                    h=1){
   ## Check if the required packages are installed
   ## Solution found from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them  
-  list.of.packages <- c("ggplot2", "grf", "quantregForest", "randomForestSRC", "survival","tidyverse")
+  list.of.packages <- c("ggplot2",
+                        "grf",
+                        "quantregForest",
+                        "randomForestSRC",
+                        "survival",
+                        "tidyverse",
+                        "fishmethods",
+                        "foreach",
+                        "doParallel")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
   if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
   suppressPackageStartupMessages(res <- lapply(X=list.of.packages,FUN=require,character.only=TRUE))

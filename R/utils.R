@@ -73,31 +73,33 @@ ggsave(filename,plot=pp,width=7,height=3)
 }
 
 
-##############################
-### plot result v.s. truth ###
-##############################
-plot_res_truth_weibull <- function(x_base,r,alpha,a,b,beta,plot=FALSE,version = "new"){
-get_true_quant <- function(x,alpha,a,b,beta){return(qweibull(alpha,a,b*exp(-x*beta/a)))}
-
-true_lo <- sapply(x_base,get_true_quant,a=a,b=b,alpha=alpha,beta = beta)
-## true_up <- sapply(x_base,get_true_quant,a=a,b=b,alpha=(1+alpha)/2,beta = beta)
-
-if(version == "new"){
-  cf <- cfsurv(x_base,r=r,data,alpha)
-  cf_lo <- unlist(cf[1,])
-}else{
-  cf <- cfsurv_quantreg(x_base,r=r,data,1-alpha)
-  cf_lo <- unlist(cf[1,])
-}
-  ##   cf_up <- unlist(cf[2,])
-  df <- data.frame(x=rep(x_base,2),y=c(true_lo,cf_lo),Curve = rep(c("True lower bnd","cf lower bnd"),each=length(x_base)))
+######################################
+### plot result v.s. true quantile ###
+######################################
+#' plot_quantiles
+#'
+#' An internal function to plot the true quantile and the conformal quantiles
+#'
+#' @export
+plot_quantiles <- function(x_base,
+                           true_lo,
+                           cox_lo,
+                           rf_lo,
+                           alpha,
+                           dir,
+                           plot=FALSE){
+  df <- data.frame(x=rep(x_base,3),y=c(true_lo,cox_lo,rf_lo),
+                   Curve = rep(c("True lower bnd",
+                                 "cf lower bnd (Cox)",
+                                 "cf lower bnd (RF)"),each=length(x_base)))
+  df$title <- sprintf("alpha=%.2f",alpha)
 pp <- ggplot(df)+geom_line(aes(x=x,y=y,col=Curve))+
   theme_bw()+
   ylab("Confidence bound")+
   geom_hline(yintercept = r, linetype="dashed",col="black")+
-  ggtitle(sprintf("alpha=%.2f",alpha))
+  facet_grid(.~title)
 if(plot){print(pp)}
-filename <- sprintf("%s/true_ci_comparison_alpha_%.2f_%s.pdf",dir,alpha,version)
+filename <- sprintf("%s/true_ci_comparison_alpha_%.2f.pdf",dir,alpha)
 ggsave(filename,pp,width=7,height=3)
 
 }
@@ -106,6 +108,12 @@ ggsave(filename,pp,width=7,height=3)
 #########################
 ### plot the result ####
 #########################
+#' plot_res
+#'
+#' An internal function to plot the result
+#'
+#'#export
+
 plot_res <- function(x_base,r,alpha_list,
                             upp_ci=NULL,
                             low_ci,
@@ -207,7 +215,7 @@ check_coverage <-  function(res,T,R,limit=TRUE){
 
 #' check_lower_coverage
 #'
-#' @param 
+#' @export
 check_coverage_lower <-  function(res,T,R){
   cover <- 0
   n <- length(R)
@@ -227,7 +235,11 @@ check_coverage_lower <-  function(res,T,R){
 
 }
 
-
+#' plot_coverage
+#'
+#' an internal function to plot the coverage rate
+#'
+#' @export
 plot_coverage <- function(cover,
                           alpha_list,
                           dir,

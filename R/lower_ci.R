@@ -1,11 +1,16 @@
 #' lower_ci
-#' construct the one-sided confidence interval for T
+#'
+#' construct the one-sided confidence interval for a unit's survival time T
 #'
 #' @param mdl The fitted model
 #' @param x The covariate of the prediction point
 #' @param r The observe time of the prediction point
-#' @param alpha level
-#' @param data data frame
+#' @param alpha The miscaverage rate.
+#' @param data A data frame used for calibration. Should contain four columns: (X,R,event,censored_T). 
+#' @param mdl The fitted model to estimate the conditional quantile. The default is NULL.
+#' @param quant_lo The fitted conditional quantile for the calibration data.
+#' @param new_quant_lo The fitted conditional quantile for the tprediction data.
+#'
 #' @export
 
 
@@ -43,6 +48,6 @@ lower_ci <- function(x,r,alpha,
   ci_low <- pmin(ci_low,r)
   ci_low <- pmax(ci_low,0)
   includeR <- ifelse(pmin(new_quant_lo,r)-r+extra_noise<=corr_term,1,0)
-  return(list(ci_low=ci_low,includeR = includeR,corr_term = corr_term))
-  ##   return(list(ci_low=ci_low,includeR = includeR))
+  ##   return(list(ci_low=ci_low,includeR = includeR,corr_term = corr_term))
+  return(list(ci_low=ci_low,includeR = includeR))
 }

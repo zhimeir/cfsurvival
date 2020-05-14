@@ -7,19 +7,24 @@
 cox_based(x, r, alpha, data_fit, data_calib, type, dist, h)
 }
 \arguments{
-\item{x}{the covariate of the prediction point}
+\item{x}{the covariate of the prediction point.}
 
-\item{r}{the observing time of the prediction point}
+\item{r}{the censoring time of the prediction point.}
 
-\item{alpha}{level of confidence. The target is to contruct a level 1-alpha confidence interval}
+\item{alpha}{Miscoverage rate.}
 
-\item{data_fit}{traing data}
+\item{data_fit}{traing data.}
 
-\item{data_calib}{calibration data}
+\item{data_calib}{calibration data.}
 
-\item{type}{type of confidence interval: marginal or local}
+\item{type}{type of confidence interval: marginal or local.}
 
-\item{dist}{distribution of T}
+\item{dist}{The distribution of T used in the cox model.}
+}
+\value{
+ci_low The lower bound of survival time.
+
+includeR An indicator suggesting if [r,inf) is included in the confidence interval.
 }
 \description{
 Construct conformal prediction model based on cox model

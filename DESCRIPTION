@@ -1,13 +1,9 @@
 Package: cfSurvival
-Title: What the Package Does (One Line, Title Case)
+Title: cfSurvival
 Version: 0.0.0.9000
-Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+Date: 2020-05-13
+Maintainer: Zhimei Ren <zren@stanford.edu>
+Description: An R package to implement conformalized survival analysis.
 License: What license it uses
 Encoding: UTF-8
 LazyData: true

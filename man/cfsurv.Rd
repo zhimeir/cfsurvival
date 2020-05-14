@@ -36,3 +36,21 @@ cfsurv(
 \description{
 The main function to generate a predictive conformal confidence interval for a unit's survival time.
 }
+\examples{
+# Generate data
+n <- 500
+X <- runif(n,0,2)
+T <- exp(X+rnorm(n,0,1)) 
+R <- rexp(n,rate = 0.01)
+event <- T<=R
+censored_T <- pmin(T,R)
+data <- data.frame(X=X,R=R,evemt=event,censored_T=censored_T)
+
+# Prediction point
+x <- seq(0,2,by=.4)
+r <- 2
+
+# Run cfsurv
+res <- cfsurv(x,r,data,alpha=0.1,model="randomforest")
+
+}
