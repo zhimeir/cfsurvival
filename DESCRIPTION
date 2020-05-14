@@ -1,5 +1,5 @@
 Package: cfSurvival
-Title: cfSurvival
+Title: Create predictive confidence inteval for right censored data.
 Version: 0.0.0.9000
 Date: 2020-05-13
 Maintainer: Zhimei Ren <zren@stanford.edu>
