@@ -1,38 +1,41 @@
-#' cfsurv
+#' Predictive confidence interval for survival data
 #'
 #' The main function to generate a predictive conformal confidence interval for a unit's survival time.
 #'
-#' @param x the covariate for prediction point. (Currently only one-dimensional.)
-#' @param r the censoring time for the prediction point.
-#' @param data a data frame containing the training data. It should contain four columns: (X,R,event,censoredT). X is the covariate; R is the censoring tim;, event is the indicator if T<=R; censored_T is the censored survial time, i.e., the minimum of T and R.
-#' @param alpha The miscoverage rate.
-#' @param seed The random seed. Default is 24601.
-#' @param model The model used to fit the quantile. Choices include "cox" and "randomforest". Default is "cox".
-#' @param dist The distribution of T used in the cox model. Choices include "weibull", "exponential" and "gaussian". Default is "weibull".
-#' @param h The bandwidth for the local confidence interval. Default is 1.
-#' @export
+#' @param x a vector of the covariate for test point. 
+#' @param r the censoring time for the test point.
+#' @param Xtrain a n-by-p matrix of the covariate of the training data.
+#' @param R a length n vector of the censoring time of the training data.
+#' @param event a length n vector of indicators if the time observed is censored. TRUE corresponds to NOT censored, and FALSE censored.
+#' @param time  a vevtor of length n, containing the observed survival time.
+#' @param alpha a number between 0 and 1, speciifying the miscoverage rate.
+#' @param seed an integer random seed (default: 24601).
+#' @param model Either "cox" or "randomforest". This determines the model used to fit the quantile (default: "cox").
+#' @param dist either "weibull", "exponential" or "gaussian" (default: "weibull"). The distribution of T used in the cox model. 
+#' @param h the bandwidth for the local confidence interval. Default is 1.
+#'
+#' @return low_ci a value of the lower bound for the survival time of the test point.
+#' @return includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
 #'
 #' @examples
 #' # Generate data
 #' n <- 500
 #' X <- runif(n,0,2)
-#' T <- exp(X+rnorm(n,0,1)) 
+#' T <- exp(X+rnorm(n,0,1))
 #' R <- rexp(n,rate = 0.01)
 #' event <- T<=R
-#' censored_T <- pmin(T,R)
-#' data <- data.frame(X=X,R=R,evemt=event,censored_T=censored_T)
-#'
+#' time <- pmin(T,R)
+#' data <- data.frame(X=X,R=R,event=event,censored_T=censored_T)
 #' # Prediction point
 #' x <- seq(0,2,by=.4)
 #' r <- 2
-#'
 #' # Run cfsurv
-#' res <- cfsurv(x,r,data,alpha=0.1,model="randomforest")
+#' res <- cfsurv(x,r,X,R,event,time,alpha=0.1,model="cox")
 #'
-
+#' @export
 
 # function to construct conformal confidence interval
-cfsurv <- function(x,r,data,
+cfsurv <- function(x,r,Xtrain,R,event,time,
                    alpha=0.05,
                    type="marginal",
                    seed = 24601,
@@ -40,7 +43,7 @@ cfsurv <- function(x,r,data,
                    dist= "weibull",
                    h=1){
   ## Check if the required packages are installed
-  ## Solution found from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them  
+  ## Solution found from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
   list.of.packages <- c("ggplot2",
                         "grf",
                         "quantregForest",
@@ -56,8 +59,26 @@ cfsurv <- function(x,r,data,
 
   ## Process the input
   ## Check the length of x and r: only two cases are supported. length(r)=1, or length(r)=length(x)
+  X <- Xtrain
   len_r <- length(r)
-  len_x <- length(x)
+  if(is.null(dim(x)[1])){
+    len_x <- length(x)
+    p <- 1
+  }else{
+    len_x <- dim(x)[1]
+    p <- dim(x)[2]
+  }
+  
+  
+  if(is.null(dim(X)[1])){
+    n <- length(X)
+    pX <- 1
+  }else{
+    n <- dim(X)[1]
+    pX <- dim(X)[2]
+  }
+  
+  
   if(len_r>1 & len_r!=len_x){
     stop("The length of R is not compatible with that of X!")
   }
@@ -70,15 +91,16 @@ cfsurv <- function(x,r,data,
 
   ## Check the value of alpha
   if (alpha>=1 | alpha<=0) stop("The value of alpha is out of bound.")
-  
-  ## Check the columns of the data frame
-  if(!is.data.frame(data))stop("data should be a data frame.")
-  check_columnname <- "X"%in%names(data)& 
-     "R"%in%names(data)&
-     "event"%in%names(data)&
-     "censored_T"%in%names(data)
-  if(!check_columnname)stop("The columns in data are not correct. Please check the document.")
 
+  ## Check the dimensions of the data 
+  xnames <- paste0('X', 1:p)
+  if(n != length(R))stop("The number of rows in X does not match the length of R.")
+  if(length(R) != length(event))stop("The length of R does not match the length of event.")
+  if(length(event) != length(time))stop("The length of event does not match the length of time.")
+  if(p != pX) stop("The dimension of the test point does not match the dimension of the training point.")
+
+  data <- as.data.frame(cbind(R,event,time,X))
+  colnames(data) <- c("R","event","censored_T",xnames)
   ## set random seed
   set.seed(seed)
 
@@ -88,8 +110,8 @@ cfsurv <- function(x,r,data,
   n_calib = n-n_train
   I_fit <- sample(1:n,n_train,replace = FALSE)
   data_fit <- data[I_fit,]
-  data_calib <- data[-I_fit,] 
-  
+  data_calib <- data[-I_fit,]
+
   ## Run the main function and gather resutls
   if(model == "cox"){
     res = cox_based(x,r,alpha,
@@ -108,6 +130,6 @@ cfsurv <- function(x,r,data,
   }
   return(res)
 
-  
+
 }
 

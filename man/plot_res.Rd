@@ -20,6 +20,3 @@ plot_res(
 \description{
 An internal function to plot the result
 }
-\details{
-#export
-}

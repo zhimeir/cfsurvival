@@ -4,4 +4,5 @@ setwd("~/Documents/GitHub/cfSurvival")
 roxygenise()
 
 install.packages("../cfSurvival",repos=NULL,type="source")
+
 library(cfSurvival)

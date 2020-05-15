@@ -2,12 +2,15 @@
 % Please edit documentation in R/cfsurv.R
 \name{cfsurv}
 \alias{cfsurv}
-\title{cfsurv}
+\title{Predictive confidence interval for survival data}
 \usage{
 cfsurv(
   x,
   r,
-  data,
+  Xtrain,
+  R,
+  event,
+  time,
   alpha = 0.05,
   type = "marginal",
   seed = 24601,
@@ -17,21 +20,32 @@ cfsurv(
 )
 }
 \arguments{
-\item{x}{the covariate for prediction point. (Currently only one-dimensional.)}
+\item{x}{a vector of the covariate for test point.}
 
-\item{r}{the censoring time for the prediction point.}
+\item{r}{the censoring time for the test point.}
 
-\item{data}{a data frame containing the training data. It should contain four columns: (X,R,event,censoredT). X is the covariate; R is the censoring tim;, event is the indicator if T<=R; censored_T is the censored survial time, i.e., the minimum of T and R.}
+\item{Xtrain}{a n-by-p matrix of the covariate of the training data.}
 
-\item{alpha}{The miscoverage rate.}
+\item{R}{a length n vector of the censoring time of the training data.}
 
-\item{seed}{The random seed. Default is 24601.}
+\item{event}{a length n vector of indicators if the time observed is censored. TRUE corresponds to NOT censored, and FALSE censored.}
 
-\item{model}{The model used to fit the quantile. Choices include "cox" and "randomforest". Default is "cox".}
+\item{time}{a vevtor of length n, containing the observed survival time.}
 
-\item{dist}{The distribution of T used in the cox model. Choices include "weibull", "exponential" and "gaussian". Default is "weibull".}
+\item{alpha}{a number between 0 and 1, speciifying the miscoverage rate.}
 
-\item{h}{The bandwidth for the local confidence interval. Default is 1.}
+\item{seed}{an integer random seed (default: 24601).}
+
+\item{model}{Either "cox" or "randomforest". This determines the model used to fit the quantile (default: "cox").}
+
+\item{dist}{either "weibull", "exponential" or "gaussian" (default: "weibull"). The distribution of T used in the cox model.}
+
+\item{h}{the bandwidth for the local confidence interval. Default is 1.}
+}
+\value{
+low_ci a value of the lower bound for the survival time of the test point.
+
+includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
 }
 \description{
 The main function to generate a predictive conformal confidence interval for a unit's survival time.
@@ -40,17 +54,15 @@ The main function to generate a predictive conformal confidence interval for a u
 # Generate data
 n <- 500
 X <- runif(n,0,2)
-T <- exp(X+rnorm(n,0,1)) 
+T <- exp(X+rnorm(n,0,1))
 R <- rexp(n,rate = 0.01)
 event <- T<=R
-censored_T <- pmin(T,R)
-data <- data.frame(X=X,R=R,evemt=event,censored_T=censored_T)
-
+time <- pmin(T,R)
+data <- data.frame(X=X,R=R,event=event,censored_T=censored_T)
 # Prediction point
 x <- seq(0,2,by=.4)
 r <- 2
-
 # Run cfsurv
-res <- cfsurv(x,r,data,alpha=0.1,model="randomforest")
+res <- cfsurv(x,r,X,R,event,time,alpha=0.1,model="cox")
 
 }

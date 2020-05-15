@@ -13,17 +13,25 @@ rf_based <- function(x,r,
                      h){
   ## Parameters
   n_calib <- dim(data_calib)[1]
-  len_x <- length(x)
+  if(is.null(dim(x)[1])){
+    len_x <- length(x)
+  }else{
+    len_x <- dim(x)[1]
+  }
   len_r <- length(r)
+  p <- dim(x)[2]
   ntree <- 1000
   nodesize <- 80
-  data_test <- data.frame(X = c(data_calib$X,x))
-
+  xnames <- paste0("X",1:p)
+  data_test <- rbind(data_calib$X,x)
+  colnames(data_test) <- xnames
+  
+  fmla <- as.formula(paste("censored_T ~ ",paste(xnames,collapse="+")))
   ## Fit the model
-  mdl <- cfSurvival::crf.km(as.formula("censored_T~X"), ntree = ntree, 
+  mdl <- crf.km(fmla, ntree = ntree, 
                  nodesize = nodesize,
                  data_train = data_fit[,names(data_fit)%in%
-                                       c("X","censored_T","event")], 
+                                       c(xnames,"censored_T","event")], 
                  data_test = data_test, 
                  yname = 'censored_T', 
                  iname = 'event',

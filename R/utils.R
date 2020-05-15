@@ -1,6 +1,3 @@
-####################
-### plot the data ##
-####################
 #' plot_raw
 #'
 #' An internal function to plot the raw data
@@ -9,6 +6,7 @@
 #' @param dir outpu directory.
 #' @param plot a logical value indicating if plotting the figure in teh interactive session.
 #' @param hist a logical value indicating if plotting the histogram.
+#'
 #' @export
 
 plot_raw <- function(data,dir,plot =FALSE,hist=FALSE){
@@ -73,9 +71,6 @@ ggsave(filename,plot=pp,width=7,height=3)
 }
 
 
-######################################
-### plot result v.s. true quantile ###
-######################################
 #' plot_quantiles
 #'
 #' An internal function to plot the true quantile and the conformal quantiles
@@ -105,14 +100,11 @@ ggsave(filename,pp,width=7,height=3)
 }
 
 
-#########################
-### plot the result ####
-#########################
 #' plot_res
 #'
 #' An internal function to plot the result
 #'
-#'#export
+#' @export
 
 plot_res <- function(x_base,r,alpha_list,
                             upp_ci=NULL,
@@ -161,9 +153,6 @@ filename <- sprintf("%s/%s_%d.pdf",dir,method_name,r)
 ggsave(filename,pp,width=10,height=5)
 }
 
-##############################
-### generate weibull T #######
-##############################
 #' generate_weibull
 #'
 #' A generic function to generate survival data generated from a cox model

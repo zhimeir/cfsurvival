@@ -14,8 +14,6 @@
 #' @return includeR An indicator suggesting if [r,inf) is included in the confidence interval.
 #'
 #' @export
-#'
-#'
 
 cox_based <- function(x,r,alpha,
                       data_fit,
@@ -24,9 +22,22 @@ cox_based <- function(x,r,alpha,
                       dist,
                       h){
   
-  len_x <- length(x)
   len_r <- length(r)
-  mdl <- survreg(Surv(censored_T,event)~X,data=data_fit,dist=dist)
+  if(is.null(dim(x)[1])){
+    len_x <- length(x)
+    p <- 1
+  }else{
+    len_x <- dim(x)[1]
+    p <- dim(x)[2]
+  }
+  if(len_r>1 & len_r!=len_x){
+    stop("The length of R is not compatible with that of X!")
+  }
+
+  xnames <- paste0("X",1:p)
+  fmla <- as.formula(paste("Surv(censored_T, event) ~ ", paste(xnames, collapse= "+")))
+  mdl <- survreg(fmla,data=data_fit,dist=dist)
+
   ## obtain final confidence interval
   if(type == "marginal"){
     res <- lower_ci(x,

@@ -21,23 +21,35 @@ lower_ci <- function(x,r,alpha,
                      new_quant_lo=NULL){
   ## Add a bit of noise to the score to break the ties
   sigma_noise <- 1e-6
-  len_x <- length(x)
   len_r <- length(r)
+  if(is.null(dim(x)[1])){
+    len_x <- length(x)
+    p <- 1
+  }else{
+    len_x <- dim(x)[1]
+    p <- dim(x)[2]
+  }
+  if(len_r>1 & len_r!=len_x){
+    stop("The length of R is not compatible with that of X!")
+  }
   n <- dim(data)[1]
+  xnames <- paste0("X",1:p)
 
   ## The nonconformty scores
   if(is.null(quant_lo)){
-  res <- predict(mdl,
-                 newdata = data.frame(X=data$X),
+    res <- predict(mdl,
+                 newdata = data,
                  type="quantile",
                  p=alpha)
-  quant_lo <-  res  
+    quant_lo <-  res  
   }
   ## calibration
   score  <-  pmin(data$R,quant_lo)-data$censored_T+rnorm(n,0,sigma_noise)
   if(is.null(new_quant_lo)){
+    newdata <- data.frame(x)
+    colnames(newdata) <- xnames
   res <- predict(mdl,
-                 newdata = data.frame(X=x),
+                 newdata = newdata,
                  type="quantile",
                  p=alpha)
   new_quant_lo <-  res

@@ -1,12 +1,14 @@
 #' lower_ci_local
 #'
 #' A function to compute the local lower bound of the survival time
+#'
 #' @param mdl the fitted moodel
 #' @param x covariate of the prediction point. Can be a point or a vector
 #' @param r observe time of the prediction point. Can be point or a vector. When it is a vector, its length should match the length of x.
 #' @param data data frame containing the calibration data
 #' @param alpha construct a level 1-alpha confidence interval
 #' @param h bandwidth (default: 1)
+#'
 #' @export
 
 lower_ci_local <- function(x,r,alpha,
@@ -16,7 +18,14 @@ lower_ci_local <- function(x,r,alpha,
                            quant_lo=NULL,
                            new_quant_lo=NULL){
   n <- dim(data)[1]
-  len_x <- length(x)
+  if(is.null(dim(x)[1])){
+    len_x <- length(x)
+  }else{
+    len_x <- dim(x)[1]
+  }
+  if(len_r>1 & len_r!=len_x){
+    stop("The length of R is not compatible with that of X!")
+  }
 
   if(is.null(quant_lo)){
   res <- predict(mdl,

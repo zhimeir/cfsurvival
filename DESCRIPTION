@@ -1,10 +1,12 @@
 Package: cfSurvival
-Title: Create predictive confidence inteval for right censored data.
-Version: 0.0.0.9000
-Date: 2020-05-13
-Maintainer: Zhimei Ren <zren@stanford.edu>
-Description: An R package to implement conformalized survival analysis.
-License: What license it uses
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Author: Who wrote it
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.0
