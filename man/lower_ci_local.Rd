@@ -2,7 +2,7 @@
 % Please edit documentation in R/lower_ci_local.R
 \name{lower_ci_local}
 \alias{lower_ci_local}
-\title{lower_ci_local}
+\title{One-sided local predictive confidence interval}
 \usage{
 lower_ci_local(
   x,
@@ -16,18 +16,32 @@ lower_ci_local(
 )
 }
 \arguments{
-\item{x}{covariate of the prediction point. Can be a point or a vector}
+\item{x}{a vector of the ovariate of the test data.}
 
-\item{r}{observe time of the prediction point. Can be point or a vector. When it is a vector, its length should match the length of x.}
+\item{r}{the censoring time of the test data.}
 
-\item{alpha}{construct a level 1-alpha confidence interval}
+\item{alpha}{a number between 0 and 1, specifying the miscoverage rate.}
 
-\item{data}{data frame containing the calibration data}
+\item{data}{a data frame used for calibration, containing four columns: (X,R,evebt,censored_T)}
 
-\item{h}{bandwidth (default: 1)}
+\item{h}{a number specifying thebandwidth (default: 1).}
 
-\item{mdl}{the fitted moodel}
+\item{mdl}{The fitted model to estimate the conditional quantile (default is NULL).}
+
+\item{quant_lo}{the fitted conditional quantile for the calibration data (default is NULL).}
+
+\item{new_quant_lo}{the fitted conditional quantile for the test data (default is NULL).}
+}
+\value{
+low_ci a value of the lower bound for the survival time of the test point.
+
+includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
 }
 \description{
-A function to compute the local lower bound of the survival time
+Construct a local one-sided confidence interval for a unit's survival time T
 }
+\seealso{
+Other confint: 
+\code{\link{lower_ci}()}
+}
+\concept{confint}

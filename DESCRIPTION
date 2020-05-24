@@ -1,11 +1,11 @@
 Package: cfSurvival
 Type: Package
-Title: What the Package Does (Title Case)
+Title: A package to construct predictive confidence interval for survival data
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Author: person("Zhimei", "Ren", email = "zren@stanford.edu",
+                  role = c("aut", "cre"))
+Maintainer: Zhimei Ren <zren@stanford.edu>
+Description: Construct a predictive confidence interval for survival data. For more deatails, see the paper and the website.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true

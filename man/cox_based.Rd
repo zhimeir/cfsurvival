@@ -2,30 +2,35 @@
 % Please edit documentation in R/cox_based.R
 \name{cox_based}
 \alias{cox_based}
-\title{cox_based}
+\title{Confidence interval based on Cox model}
 \usage{
 cox_based(x, r, alpha, data_fit, data_calib, type, dist, h)
 }
 \arguments{
-\item{x}{the covariate of the prediction point.}
+\item{x}{a vector of the covariate of the test data.}
 
-\item{r}{the censoring time of the prediction point.}
+\item{r}{the censoring time of the test data.}
 
-\item{alpha}{Miscoverage rate.}
+\item{alpha}{a number betweeo 0 and 1, specifying the miscaverage rate.}
 
-\item{data_fit}{traing data.}
+\item{data_fit}{a data frame, containing the training data.}
 
-\item{data_calib}{calibration data.}
+\item{data_calib}{a data frame, containing the calibration data.}
 
-\item{type}{type of confidence interval: marginal or local.}
+\item{type}{either "marginal" or "local". Determines the type of confidence interval.}
 
 \item{dist}{The distribution of T used in the cox model.}
 }
 \value{
-ci_low The lower bound of survival time.
+low_ci a value of the lower bound for the survival time of the test point.
 
-includeR An indicator suggesting if [r,inf) is included in the confidence interval.
+includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
 }
 \description{
-Construct conformal prediction model based on cox model
+Construct conformal predictive interval based on cox model
 }
+\seealso{
+Other model: 
+\code{\link{rf_based}()}
+}
+\concept{model}

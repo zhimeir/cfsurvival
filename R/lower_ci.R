@@ -1,15 +1,19 @@
-#' lower_ci
+#'  One-sided predictive confidence interval
 #'
 #' construct the one-sided confidence interval for a unit's survival time T
 #'
-#' @param mdl The fitted model
-#' @param x The covariate of the prediction point
-#' @param r The observe time of the prediction point
-#' @param alpha The miscaverage rate.
-#' @param data A data frame used for calibration. Should contain four columns: (X,R,event,censored_T). 
-#' @param mdl The fitted model to estimate the conditional quantile. The default is NULL.
-#' @param quant_lo The fitted conditional quantile for the calibration data.
-#' @param new_quant_lo The fitted conditional quantile for the tprediction data.
+#' @param x a vector of the covariate of the test data.
+#' @param r the censoring time of the test data.
+#' @param alpha a number betweeo 0 and 1, specifying the miscaverage rate.
+#' @param data a data frame used for calibration, containing four columns: (X,R,event,censored_T). 
+#' @param mdl The fitted model to estimate the conditional quantile (default is NULL).
+#' @param quant_lo the fitted conditional quantile for the calibration data (default is NULL).
+#' @param new_quant_lo the fitted conditional quantile for the test data (default is NULL).
+#'
+#' @return low_ci a value of the lower bound for the survival time of the test point.
+#' @return includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
+#'
+#' @family confint
 #'
 #' @export
 

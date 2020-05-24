@@ -2,7 +2,7 @@
 % Please edit documentation in R/lower_ci.R
 \name{lower_ci}
 \alias{lower_ci}
-\title{lower_ci}
+\title{One-sided predictive confidence interval}
 \usage{
 lower_ci(
   x,
@@ -15,20 +15,30 @@ lower_ci(
 )
 }
 \arguments{
-\item{x}{The covariate of the prediction point}
+\item{x}{a vector of the covariate of the test data.}
 
-\item{r}{The observe time of the prediction point}
+\item{r}{the censoring time of the test data.}
 
-\item{alpha}{The miscaverage rate.}
+\item{alpha}{a number betweeo 0 and 1, specifying the miscaverage rate.}
 
-\item{data}{A data frame used for calibration. Should contain four columns: (X,R,event,censored_T).}
+\item{data}{a data frame used for calibration, containing four columns: (X,R,event,censored_T).}
 
-\item{mdl}{The fitted model to estimate the conditional quantile. The default is NULL.}
+\item{mdl}{The fitted model to estimate the conditional quantile (default is NULL).}
 
-\item{quant_lo}{The fitted conditional quantile for the calibration data.}
+\item{quant_lo}{the fitted conditional quantile for the calibration data (default is NULL).}
 
-\item{new_quant_lo}{The fitted conditional quantile for the tprediction data.}
+\item{new_quant_lo}{the fitted conditional quantile for the test data (default is NULL).}
+}
+\value{
+low_ci a value of the lower bound for the survival time of the test point.
+
+includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
 }
 \description{
 construct the one-sided confidence interval for a unit's survival time T
 }
+\seealso{
+Other confint: 
+\code{\link{lower_ci_local}()}
+}
+\concept{confint}

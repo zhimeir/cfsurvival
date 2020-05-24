@@ -1,17 +1,19 @@
-#' cox_based
+#' Confidence interval based on Cox model
 #'
-#' Construct conformal prediction model based on cox model
+#' Construct conformal predictive interval based on cox model
 #'
-#' @param x the covariate of the prediction point.
-#' @param r the censoring time of the prediction point.
-#' @param alpha Miscoverage rate.
-#' @param data_fit traing data.
-#' @param data_calib calibration data.
-#' @param type type of confidence interval: marginal or local.
+#' @param x a vector of the covariate of the test data.
+#' @param r the censoring time of the test data.
+#' @param alpha a number betweeo 0 and 1, specifying the miscaverage rate.
+#' @param data_fit a data frame, containing the training data.
+#' @param data_calib a data frame, containing the calibration data.
+#' @param type either "marginal" or "local". Determines the type of confidence interval.
 #' @param dist The distribution of T used in the cox model.
 #'
-#' @return ci_low The lower bound of survival time.
-#' @return includeR An indicator suggesting if [r,inf) is included in the confidence interval.
+#' @return low_ci a value of the lower bound for the survival time of the test point.
+#' @return includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
+#'
+#' @family model
 #'
 #' @export
 

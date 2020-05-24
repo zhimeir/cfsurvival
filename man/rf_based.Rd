@@ -2,13 +2,35 @@
 % Please edit documentation in R/rf_based.R
 \name{rf_based}
 \alias{rf_based}
-\title{rf_based}
+\title{Confidence interval based on random forest}
 \usage{
 rf_based(x, r, alpha, data_fit, data_calib, type, h)
 }
 \arguments{
-\item{x}{covariate of the prediction point}
+\item{x}{a vector of the covariate of the test data.}
+
+\item{r}{the censoring time of the test data.}
+
+\item{alpha}{a number betweeo 0 and 1, specifying the miscaverage rate.}
+
+\item{data_fit}{a data frame, containing the training data.}
+
+\item{data_calib}{a data frame, containing the calibration data.}
+
+\item{type}{either "marginal" or "local". Determines the type of confidence interval.}
+
+\item{dist}{The distribution of T used in the cox model.}
+}
+\value{
+low_ci a value of the lower bound for the survival time of the test point.
+
+includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
 }
 \description{
-Construct a conformal prediction confidence interval based on random forest
+Construct a conformal predictive confidence interval based on random forest
 }
+\seealso{
+Other model: 
+\code{\link{cox_based}()}
+}
+\concept{model}
