@@ -19,7 +19,7 @@
 
 
 lower_ci <- function(x,r,alpha,
-                     data=data,
+                     data,
                      mdl=NULL,
                      quant_lo=NULL,
                      new_quant_lo=NULL){
@@ -52,11 +52,11 @@ lower_ci <- function(x,r,alpha,
   if(is.null(new_quant_lo)){
     newdata <- data.frame(x)
     colnames(newdata) <- xnames
-  res <- predict(mdl,
+    res <- predict(mdl,
                  newdata = newdata,
                  type="quantile",
                  p=alpha)
-  new_quant_lo <-  res
+    new_quant_lo <-  res
   }
   corr_term <- quantile(c(score,Inf),1-alpha,type=1)
   extra_noise <- rnorm(len_x,0,sigma_noise)

@@ -4,15 +4,7 @@
 \alias{lower_ci}
 \title{One-sided predictive confidence interval}
 \usage{
-lower_ci(
-  x,
-  r,
-  alpha,
-  data = data,
-  mdl = NULL,
-  quant_lo = NULL,
-  new_quant_lo = NULL
-)
+lower_ci(x, r, alpha, data, mdl = NULL, quant_lo = NULL, new_quant_lo = NULL)
 }
 \arguments{
 \item{x}{a vector of the covariate of the test data.}
