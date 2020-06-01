@@ -41,6 +41,7 @@ cfsurv <- function(x,r,Xtrain,R,event,time,
                    seed = 24601,
                    model = "cox",
                    dist= "weibull",
+                   I_fit = NULL,
                    h=1){
   ## Check if the required packages are installed
   ## Solution found from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
@@ -108,7 +109,9 @@ cfsurv <- function(x,r,Xtrain,R,event,time,
   n = dim(data)[1]
   n_train = n/2
   n_calib = n-n_train
-  I_fit <- sample(1:n,n_train,replace = FALSE)
+  if(is.null(I_fit)){
+    I_fit <- sample(1:n,n_train,replace = FALSE)
+  }
   data_fit <- data[I_fit,]
   data_calib <- data[-I_fit,]
 

@@ -16,6 +16,7 @@ cfsurv(
   seed = 24601,
   model = "cox",
   dist = "weibull",
+  I_fit = NULL,
   h = 1
 )
 }
