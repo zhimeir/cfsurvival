@@ -2,10 +2,11 @@
 % Please edit documentation in R/utils.R
 \name{plot_quantiles}
 \alias{plot_quantiles}
-\title{plot_quantiles}
+\title{Plot the true quantile and the conformal quantiles}
 \usage{
 plot_quantiles(x_base, true_lo, cox_lo, rf_lo, alpha, dir, plot = FALSE)
 }
 \description{
-An internal function to plot the true quantile and the conformal quantiles
+Plot the true quantile and the conformal quantiles
 }
+\keyword{internal}

@@ -2,19 +2,11 @@
 % Please edit documentation in R/utils.R
 \name{plot_raw}
 \alias{plot_raw}
-\title{plot_raw}
+\title{plot the raw data}
 \usage{
 plot_raw(data, dir, plot = FALSE, hist = FALSE)
 }
-\arguments{
-\item{data}{The data frame to be plotted. Consists (X,R,censored_T).}
-
-\item{dir}{outpu directory.}
-
-\item{plot}{a logical value indicating if plotting the figure in teh interactive session.}
-
-\item{hist}{a logical value indicating if plotting the histogram.}
-}
 \description{
-An internal function to plot the raw data
+plot the raw data
 }
+\keyword{internal}

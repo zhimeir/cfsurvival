@@ -9,3 +9,4 @@ check_coverage_lower(res, T, R)
 \description{
 check_lower_coverage
 }
+\keyword{internal}

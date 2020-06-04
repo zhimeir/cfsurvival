@@ -2,10 +2,11 @@
 % Please edit documentation in R/utils.R
 \name{generate_weibull}
 \alias{generate_weibull}
-\title{generate_weibull}
+\title{Generate survival data generated from a cox model}
 \usage{
 generate_weibull(n, a, b, beta, Rmax, seed, info = FALSE)
 }
 \description{
-A generic function to generate survival data generated from a cox model
+Generate survival data generated from a cox model
 }
+\keyword{internal}

@@ -1,13 +1,6 @@
-#' plot_raw
+#' plot the raw data
 #'
-#' An internal function to plot the raw data
-#'
-#' @param data The data frame to be plotted. Consists (X,R,censored_T).
-#' @param dir outpu directory.
-#' @param plot a logical value indicating if plotting the figure in teh interactive session.
-#' @param hist a logical value indicating if plotting the histogram.
-#'
-#' @export
+#' @keywords internal
 
 plot_raw <- function(data,dir,plot =FALSE,hist=FALSE){
 
@@ -71,11 +64,10 @@ ggsave(filename,plot=pp,width=7,height=3)
 }
 
 
-#' plot_quantiles
+
+#' Plot the true quantile and the conformal quantiles
 #'
-#' An internal function to plot the true quantile and the conformal quantiles
-#'
-#' @export
+#' @keywords internal
 plot_quantiles <- function(x_base,
                            true_lo,
                            cox_lo,
@@ -100,11 +92,10 @@ ggsave(filename,pp,width=7,height=3)
 }
 
 
-#' plot_res
-#'
+
 #' An internal function to plot the result
 #'
-#' @export
+#' @keywords internal
 
 plot_res <- function(x_base,r,alpha_list,
                             upp_ci=NULL,
@@ -153,11 +144,11 @@ filename <- sprintf("%s/%s_%d.pdf",dir,method_name,r)
 ggsave(filename,pp,width=10,height=5)
 }
 
-#' generate_weibull
+
+
+#' Generate survival data generated from a cox model
 #'
-#' A generic function to generate survival data generated from a cox model
-#'
-#' @export
+#' @keywords internal
 generate_weibull <- function(n,a,b,beta,Rmax,seed,info=FALSE){
   set.seed(seed)
   X      <- runif(n,0,0.5)       # covariate
@@ -204,7 +195,7 @@ check_coverage <-  function(res,T,R,limit=TRUE){
 
 #' check_lower_coverage
 #'
-#' @export
+#' @keywords internal
 check_coverage_lower <-  function(res,T,R){
   cover <- 0
   n <- length(R)
@@ -224,11 +215,10 @@ check_coverage_lower <-  function(res,T,R){
 
 }
 
-#' plot_coverage
+
+#' Plot the coverage rate
 #'
-#' an internal function to plot the coverage rate
-#'
-#' @export
+#' @keywords internal
 plot_coverage <- function(cover,
                           alpha_list,
                           dir,

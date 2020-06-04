@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{plot_res}
 \alias{plot_res}
-\title{plot_res}
+\title{An internal function to plot the result}
 \usage{
 plot_res(
   x_base,
@@ -20,3 +20,4 @@ plot_res(
 \description{
 An internal function to plot the result
 }
+\keyword{internal}

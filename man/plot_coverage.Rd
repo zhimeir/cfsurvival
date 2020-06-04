@@ -2,10 +2,11 @@
 % Please edit documentation in R/utils.R
 \name{plot_coverage}
 \alias{plot_coverage}
-\title{plot_coverage}
+\title{Plot the coverage rate}
 \usage{
 plot_coverage(cover, alpha_list, dir, plotname, plot = FALSE)
 }
 \description{
-an internal function to plot the coverage rate
+Plot the coverage rate
 }
+\keyword{internal}

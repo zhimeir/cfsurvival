@@ -28,17 +28,18 @@ rf_based <- function(x,r,
   if(is.null(dim(x)[1])){
     len_x <- length(x)
     p <- 1
-    data_test <- c(data_calib$X,x)
+    xnames <- paste0("X",1:p)
+    data_test <- c(data_calib$X1,x)
   }else{
     len_x <- dim(x)[1]
     p <- dim(x)[2]
-    data_test <- rbind(data_calib$X,x)
+    xnames <- paste0("X",1:p)
+    data_test <- rbind(data_calib[,colnames(data_calib)%in%xnames],x)
   }
   len_r <- length(r)
   ntree <- 1000
   nodesize <- 80
-  xnames <- paste0("X",1:p)
-  ##   data_test <- rbind(data_calib$X,x)
+
   data_test <- data.frame(data_test)
   names(data_test) <- xnames
   fmla <- as.formula(paste("censored_T ~ ",paste(xnames,collapse="+")))
@@ -54,7 +55,6 @@ rf_based <- function(x,r,
                  method = "grf")
   quant_lo <- mdl$predicted[1:n_calib]
   new_quant_lo <- tail(mdl$predicted,-n_calib)
-
   ## obtain final confidence interval
   if(type == "marginal"){
     res <- lower_ci(x,
