@@ -37,8 +37,8 @@ rf_based <- function(x,r,
     data_test <- rbind(data_calib[,colnames(data_calib)%in%xnames],x)
   }
   len_r <- length(r)
-  ntree <- 1000
-  nodesize <- 80
+  ntree <- 2000
+  nodesize <- 400
 
   data_test <- data.frame(data_test)
   names(data_test) <- xnames

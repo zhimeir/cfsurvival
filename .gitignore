@@ -3,3 +3,8 @@
 .RData
 .Ruserdata
 .swp
+*.sw*
+.Rapp.history
+.Rbuildignore
+
+
