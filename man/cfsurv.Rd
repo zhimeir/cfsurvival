@@ -37,7 +37,7 @@ cfsurv(
 
 \item{seed}{an integer random seed (default: 24601).}
 
-\item{model}{Either "cox" or "randomforest". This determines the model used to fit the quantile (default: "cox").}
+\item{model}{Options include "cox", "randomforest", "Powell", "Portnoy" and "PengHuang". This determines the model used to fit the condditional quantile (default: "cox").}
 
 \item{dist}{either "weibull", "exponential" or "gaussian" (default: "weibull"). The distribution of T used in the cox model.}
 

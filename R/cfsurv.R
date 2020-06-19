@@ -10,7 +10,7 @@
 #' @param time  a vevtor of length n, containing the observed survival time.
 #' @param alpha a number between 0 and 1, speciifying the miscoverage rate.
 #' @param seed an integer random seed (default: 24601).
-#' @param model Either "cox" or "randomforest". This determines the model used to fit the quantile (default: "cox").
+#' @param model Options include "cox", "randomforest", "Powell", "Portnoy" and "PengHuang". This determines the model used to fit the condditional quantile (default: "cox").
 #' @param dist either "weibull", "exponential" or "gaussian" (default: "weibull"). The distribution of T used in the cox model. 
 #' @param h the bandwidth for the local confidence interval. Default is 1.
 #'
@@ -46,6 +46,7 @@ cfsurv <- function(x,r,Xtrain,R,event,time,
   ## Check if the required packages are installed
   ## Solution found from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
   list.of.packages <- c("ggplot2",
+                        "quantreg",
                         "grf",
                         "quantregForest",
                         "randomForestSRC",
@@ -85,7 +86,7 @@ cfsurv <- function(x,r,Xtrain,R,event,time,
   }
 
   ## Check the type of the model. Only "cox" and "randomforest" are supported
-  if(model %in% c("cox","randomforest")==0) stop("The regression model is not supported.")
+  if(model %in% c("cox","randomforest","pow","portnoy","PengHuang")==0) stop("The regression model is not supported.")
 
   ## Check the type of the confidence inteval
   if(type %in% c("marginal","local")==0) stop("The type of confidence interval is not supported.")
@@ -126,6 +127,27 @@ cfsurv <- function(x,r,Xtrain,R,event,time,
    }
   if(model == "randomforest"){
     res = rf_based(x,r,alpha,
+                   data_fit,
+                   data_calib,
+                   type,
+                   h)
+  }
+  if(model == "pow"){
+    res = pow_based(x,r,alpha,
+                   data_fit,
+                   data_calib,
+                   type,
+                   h)
+  }
+  if(model == "portnoy"){
+    res = portnoy_based(x,r,alpha,
+                   data_fit,
+                   data_calib,
+                   type,
+                   h)
+  }
+  if(model == "PengHuang"){
+    res = ph_based(x,r,alpha,
                    data_fit,
                    data_calib,
                    type,

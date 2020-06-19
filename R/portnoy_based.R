@@ -1,4 +1,4 @@
-#' Confidence interval based on Powell (1986)
+#' Confidence interval based on Portnoy (2003)
 #'
 #' Construct conformal predictive interval based on cox model
 #'
@@ -17,7 +17,7 @@
 #'
 #' @export
 
-pow_based <- function(x,r,alpha,
+portnoy_based <- function(x,r,alpha,
                       data_fit,
                       data_calib,
                       type,
@@ -37,19 +37,23 @@ pow_based <- function(x,r,alpha,
   }
 
   xnames <- paste0("X",1:p)
-  fmla <- as.formula(paste("Curv(censored_T, R,ctype=\"right\") ~ ", paste(xnames, collapse= "+")))
-  mdl <- crq(fmla,data=data_fit,method = "Pow",taus = alpha)
-  res <- predict(mdl,
-        newdata = data_calib,
-        type = "quantile")
-  quant_lo <- res
+  fmla <- as.formula(paste("Surv(censored_T, event) ~ ", paste(xnames, collapse= "+")))
+  mdl <- crq(fmla,data=data_fit,method = "Portnoy")
+  mdl_coef <- coef(mdl,taus = alpha)
 
-  newdata <- data.frame(x)
-  colnames(newdata) <- xnames
-  res <- predict(mdl,
-        newdata = newdata,
-        type = "quantile")
-  new_quant_lo <- res
+  ## A function to get result
+  extract_res <- function(x,mdl_coef){
+    res <- mdl_coef[1] + x%*%mdl_coef[-1]
+    return(res)
+  }
+  ## Extract scores
+  if(p==1){
+    quant_lo <- sapply(data_calib[,colnames(data_calib)%in%xnames],extract_res,mdl_coef = mdl_coef)%>%t()
+    new_quant_lo <- sapply(x,extract_res,mdl_coef=mdl_coef)%>%t()
+  }else{
+    quant_lo <- apply(data_calib[,colnames(data_calib)%in%xnames],1,extract_res,mdl_coef = mdl_coef)%>%t()
+    new_quant_lo <- apply(x,1,extract_res,mdl_coef=mdl_coef)%>%t()
+  }
   ## obtain final confidence interval
   if(type == "marginal"){
     res <- lower_ci(x,
@@ -84,4 +88,11 @@ pow_based <- function(x,r,alpha,
       }
 
       }
+}
+
+
+## A function to get result
+extract_res <- function(x){
+  res <- mdl_coef[1,] + x%*%mdl_coef[-1,]
+  return(res)
 }
