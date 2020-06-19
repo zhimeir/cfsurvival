@@ -60,16 +60,13 @@ lower_ci_local <- function(x,r,alpha,
   new_quant_lo <-  res
   }
   
+  w <- get_weight_r(data,h,r,r)
   score_vec <- c(score,Inf)
   sort_score <- sort(score_vec)
   order_score <- order(score_vec)
-  corr_term <- c()
-  for(ind.r in 1:len_r){
-    w <- get_weight_r(data,h,r[ind.r],r[ind.r])
-    sort_w <- w[order_score]
-    idxw <- min(which(cumsum(sort_w)>=1-alpha))
-    corr_term <- c(corr_term,sort_score[idxw])
-  }
+  sort_w <- w[order_score]
+  idxw <- min(which(cumsum(sort_w)>=1-alpha))
+  corr_term <- sort_score[idxw]
   extra_noise <- rnorm(len_x,0,sigma_noise)
   ci_low <- pmin(new_quant_lo,r)-corr_term+extra_noise
   ci_low <- pmin(ci_low,r)
