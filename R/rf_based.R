@@ -79,7 +79,7 @@ rf_based <- function(x,r,
       }
 
       ## When there are multiple pairs of (x,r)
-      if(len_x == len_r){
+      if(len_x == len_r & len_x>1){
         res <- pmap(list(x=x,r=r,new_quant_lo = new_quant_lo),
                     lower_ci_local,
                     alpha=alpha,

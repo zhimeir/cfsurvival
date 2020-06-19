@@ -8,7 +8,6 @@
 #' @param data_fit a data frame, containing the training data.
 #' @param data_calib a data frame, containing the calibration data.
 #' @param type either "marginal" or "local". Determines the type of confidence interval.
-#' @param dist The distribution of T used in the cox model.
 #'
 #' @return low_ci a value of the lower bound for the survival time of the test point.
 #' @return includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
@@ -21,7 +20,6 @@ ph_based <- function(x,r,alpha,
                       data_fit,
                       data_calib,
                       type,
-                      dist,
                       h){
   
   len_r <- length(r)
@@ -40,7 +38,7 @@ ph_based <- function(x,r,alpha,
   fmla <- as.formula(paste("Surv(censored_T, event) ~ ", paste(xnames, collapse= "+")))
   mdl <- crq(fmla,data=data_fit,method = "PengHuang")
   mdl_coef <- coef(mdl,taus = alpha)
-
+  if(sum(is.na(mdl_coef))>0) stop("The base learner fails.")
   ## A function to get result
   extract_res <- function(x,mdl_coef){
     res <- mdl_coef[1] + x%*%mdl_coef[-1]
@@ -78,7 +76,7 @@ ph_based <- function(x,r,alpha,
         return(res)
       }
       ## When there are multiple pairs of (x,r)
-      if(len_x == len_r){
+      if(len_x == len_r & len_x>1){
         res <- pmap(list(x=x,r=r,new_quant_lo = new_quant_lo),
                     lower_ci_local,
                     alpha=alpha,

@@ -8,7 +8,6 @@
 #' @param data_fit a data frame, containing the training data.
 #' @param data_calib a data frame, containing the calibration data.
 #' @param type either "marginal" or "local". Determines the type of confidence interval.
-#' @param dist The distribution of T used in the cox model.
 #'
 #' @return low_ci a value of the lower bound for the survival time of the test point.
 #' @return includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
@@ -21,7 +20,6 @@ pow_based <- function(x,r,alpha,
                       data_fit,
                       data_calib,
                       type,
-                      dist,
                       h){
   
   len_r <- length(r)
@@ -73,7 +71,7 @@ pow_based <- function(x,r,alpha,
         return(res)
       }
       ## When there are multiple pairs of (x,r)
-      if(len_x == len_r){
+      if(len_x == len_r & len_r>1){
         res <- pmap(list(x=x,r=r,new_quant_lo = new_quant_lo),
                     lower_ci_local,
                     alpha=alpha,

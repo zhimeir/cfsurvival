@@ -4,7 +4,7 @@
 \alias{ph_based}
 \title{Confidence interval based on Peng and Huang (2008)}
 \usage{
-ph_based(x, r, alpha, data_fit, data_calib, type, dist, h)
+ph_based(x, r, alpha, data_fit, data_calib, type, h)
 }
 \arguments{
 \item{x}{a vector of the covariate of the test data.}
@@ -18,8 +18,6 @@ ph_based(x, r, alpha, data_fit, data_calib, type, dist, h)
 \item{data_calib}{a data frame, containing the calibration data.}
 
 \item{type}{either "marginal" or "local". Determines the type of confidence interval.}
-
-\item{dist}{The distribution of T used in the cox model.}
 }
 \value{
 low_ci a value of the lower bound for the survival time of the test point.
