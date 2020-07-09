@@ -1,4 +1,4 @@
-#'  One-sided predictive confidence interval
+#' One-sided predictive confidence interval (scaled)
 #'
 #' construct the one-sided confidence interval for a unit's survival time T
 #'
@@ -18,10 +18,13 @@
 #' @export
 
 
-lower_ci <- function(x,r,alpha,
+scaled_lower_ci <- function(x,r,alpha,
                      data,
-                     quant_lo=NULL,
-                     new_quant_lo=NULL){
+                     quant_lo,
+                     new_quant_lo,
+                     weight,
+                     new_weight
+                     ){
   ## Add a bit of noise to the score to break the ties
   sigma_noise <- 1e-6
   len_r <- length(r)
@@ -41,12 +44,14 @@ lower_ci <- function(x,r,alpha,
   ## The nonconformity scores
   ## calibration
   score  <-  pmin(data$R,quant_lo)-data$censored_T+rnorm(n,0,sigma_noise)
+  ## Normalize the score by the interquantile range
+  score <- score/weight
   corr_term <- quantile(c(score,Inf),1-alpha,type=1)
   extra_noise <- rnorm(len_x,0,sigma_noise)
-  ci_low <- pmin(new_quant_lo,r)-corr_term+extra_noise
+  ci_low <- pmin(new_quant_lo,r)-new_weight*corr_term+extra_noise
   ci_low <- pmin(ci_low,r)
   ci_low <- pmax(ci_low,0)
-  includeR <- ifelse(pmin(new_quant_lo,r)-r+extra_noise<=corr_term,1,0)
+  includeR <- ifelse(pmin(new_quant_lo,r)-r+extra_noise<=new_weight*corr_term,1,0)
   ##   return(list(ci_low=ci_low,includeR = includeR,corr_term = corr_term))
   return(list(ci_low=ci_low,includeR = includeR))
 }

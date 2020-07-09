@@ -86,7 +86,7 @@ cfsurv <- function(x,r,Xtrain,R,event,time,
   }
 
   ## Check the type of the model. Only "cox" and "randomforest" are supported
-  if(model %in% c("cox","randomforest","pow","portnoy","PengHuang")==0) stop("The regression model is not supported.")
+  if(model %in% c("cox","cox_scaled","randomforest","pow","portnoy","PengHuang")==0) stop("The regression model is not supported.")
 
   ## Check the type of the confidence inteval
   if(type %in% c("marginal","local")==0) stop("The type of confidence interval is not supported.")
@@ -119,6 +119,14 @@ cfsurv <- function(x,r,Xtrain,R,event,time,
   ## Run the main function and gather resutls
   if(model == "cox"){
     res = cox_based(x,r,alpha,
+                    data_fit,
+                    data_calib,
+                    type,
+                    dist,
+                    h)
+   }
+  if(model == "cox_scaled"){
+    res = cox_scaled(x,r,alpha,
                     data_fit,
                     data_calib,
                     type,

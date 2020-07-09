@@ -30,6 +30,7 @@ Construct conformal predictive interval based on cox model
 \seealso{
 Other model: 
 \code{\link{cox_based}()},
+\code{\link{cox_scaled}()},
 \code{\link{portnoy_based}()},
 \code{\link{pow_based}()},
 \code{\link{rf_based}()}

@@ -52,6 +52,7 @@ portnoy_based <- function(x,r,alpha,
     quant_lo <- apply(data_calib[,colnames(data_calib)%in%xnames],1,extract_res,mdl_coef = mdl_coef)%>%t()
     new_quant_lo <- apply(x,1,extract_res,mdl_coef=mdl_coef)%>%t()
   }
+  
   ## obtain final confidence interval
   if(type == "marginal"){
     res <- lower_ci(x,

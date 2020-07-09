@@ -1,4 +1,4 @@
-#' Confidence interval based on Cox model
+#' Confidence interval based on Cox model (scaled)
 #'
 #' Construct conformal predictive interval based on cox model
 #'
@@ -17,7 +17,7 @@
 #'
 #' @export
 
-cox_based <- function(x,r,alpha,
+cox_scaled <- function(x,r,alpha,
                       data_fit,
                       data_calib,
                       type,
@@ -39,40 +39,42 @@ cox_based <- function(x,r,alpha,
   xnames <- paste0("X",1:p)
   fmla <- as.formula(paste("Surv(censored_T, event) ~ ", paste(xnames, collapse= "+")))
   mdl <- survreg(fmla,data=data_fit,dist=dist)
-  #The fitted quantile for the calibration data
   res <- predict(mdl,
                  newdata = data_calib,
                  type="quantile",
-                 p=alpha)
-  quant_lo <-  res  
-  
+                 p=c(alpha,0.25,0.75))
+  quant_lo <-  res[,1]
+  weight <- res[,3]-res[,2]
+
   #The fitted quantile for the new data
   newdata <- data.frame(x)
   colnames(newdata) <- xnames
   res <- predict(mdl,
                  newdata = newdata,
                  type="quantile",
-                 p=alpha)
-  new_quant_lo <-  res
-  
+                 p=c(alpha,0.25,0.75))
+  new_quant_lo <-  res[,1]
+  new_weight <- res[,3]-res[,2]
+
   ## obtain final confidence interval
   if(type == "marginal"){
-    res <- lower_ci(x,
+    res <- scaled_lower_ci(x,
                 r=r,
                 alpha=alpha,
                 data = data_calib,
                 quant_lo = quant_lo,
-                new_quant_lo = new_quant_lo
+                new_quant_lo = new_quant_lo,
+                weight = weight,
+                new_weight = new_weight
     )
     return(res)
   }
     if(type == "local"){
         res <- lower_ci_local(x,
+                              mdl=mdl,
                               r=r,
                               alpha=alpha,
                               data=data_calib,
-                              quant_lo = quant_lo,
-                              new_quant_lo = new_quant_lo,
                               h=h)
         return(res)
       }
