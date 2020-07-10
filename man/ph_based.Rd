@@ -33,6 +33,7 @@ Other model:
 \code{\link{cox_scaled}()},
 \code{\link{portnoy_based}()},
 \code{\link{pow_based}()},
-\code{\link{rf_based}()}
+\code{\link{rf_based}()},
+\code{\link{rf_scaled}()}
 }
 \concept{model}
