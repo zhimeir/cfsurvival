@@ -6,5 +6,6 @@
 *.sw*
 .Rapp.history
 .Rbuildignore
+/local
 
 
