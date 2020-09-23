@@ -42,6 +42,7 @@ Construct a local one-sided confidence interval for a unit's survival time T
 }
 \seealso{
 Other confint: 
+\code{\link{get_calibration}()},
 \code{\link{lower_ci}()},
 \code{\link{scaled_lower_ci}()}
 }

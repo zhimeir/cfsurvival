@@ -29,6 +29,7 @@ Construct conformal predictive interval based on cox model
 }
 \seealso{
 Other model: 
+\code{\link{adaptive_cox_based}()},
 \code{\link{cox_based}()},
 \code{\link{cox_scaled}()},
 \code{\link{ph_based}()},
