@@ -17,14 +17,13 @@
 #'
 #' @export
 
-cox_based <- function(x,r,alpha,
+cox_based <- function(x,c,alpha,
                       data_fit,
                       data_calib,
                       type,
                       dist,
-                      h){
-  
-  len_r <- length(r)
+                      weight_calib,
+                      weight_new){
   if(is.null(dim(x)[1])){
     len_x <- length(x)
     p <- 1
@@ -32,48 +31,82 @@ cox_based <- function(x,r,alpha,
     len_x <- dim(x)[1]
     p <- dim(x)[2]
   }
-  if(len_r>1 & len_r!=len_x){
-    stop("The length of R is not compatible with that of X!")
-  }
 
-  xnames <- paste0("X",1:p)
-  fmla <- as.formula(paste("Surv(censored_T, event) ~ ", paste(xnames, collapse= "+")))
-  mdl <- survreg(fmla,data=data_fit,dist=dist)
-  #The fitted quantile for the calibration data
-  res <- predict(mdl,
-                 newdata = data_calib,
-                 type="quantile",
-                 p=alpha)
-  quant_lo <-  res  
+  ## Keep the data points with C>=c; transform min(T,C) to min(T,c) 
+  weight_calib <- weight_calib[data_calib$C>=c]
+  data_calib <- data_calib[data_calib$C>=c,]
+  data_calib$censored_T <- pmin(data_calib$censored_T,c)
   
-  #The fitted quantile for the new data
-  newdata <- data.frame(x)
-  colnames(newdata) <- xnames
-  res <- predict(mdl,
-                 newdata = newdata,
-                 type="quantile",
-                 p=alpha)
-  new_quant_lo <-  res
+  if(type == "quantile"){
+    ## Fit the survival model
+    xnames <- paste0("X",1:p)
+    fmla <- as.formula(paste("Surv(censored_T, event) ~ ", paste(xnames, collapse= "+")))
+    mdl <- survreg(fmla,data=data_fit,dist=dist)
+
+    ## The fitted quantile for the calibration data
+    res <- predict(mdl,
+                  newdata = data_calib,
+                  type="quantile",
+                  p=alpha)
+    quant <-  res  
+    score <- pmin(data_calib$C,quant)-data_calib$censored_T
   
-  ## obtain final confidence interval
-  if(type == "marginal"){
-    res <- lower_ci(x,
-                r=r,
-                alpha=alpha,
-                data = data_calib,
-                quant_lo = quant_lo,
-                new_quant_lo = new_quant_lo
-    )
-    return(res)
-  }
-    if(type == "local"){
-        res <- lower_ci_local(x,
-                              r=r,
-                              alpha=alpha,
-                              data=data_calib,
-                              quant_lo = quant_lo,
-                              new_quant_lo = new_quant_lo,
-                              h=h)
-        return(res)
-      }
+    ## The fitted quantile for the new data
+    newdata <- data.frame(x)
+    colnames(newdata) <- xnames
+    res <- predict(mdl,
+                  newdata = newdata,
+                  type="quantile",
+                  p=alpha)
+    new_quant <-  res
+
+    ## Compute the calibration term
+    calib_term <- sapply(X=weight_new,get_calibration,score=score,
+                        weight_calib=weight_calib,alpha=alpha)
+
+    ## obtain final confidence interval
+    lower_bnd <- pmin(new_quant,c)-calib_term
+    }
+
+  if(type == "percentile"){
+    ## Fit the model
+    xnames <- paste0("X",1:p)
+    fmla <- as.formula(paste("Surv(censored_T, event) ~ ", paste(xnames, collapse= "+")))
+    mdl <- coxph(fmla,data=data_fit)
+
+    ## Extract the fitted survival function
+    res <- survfit(mdl,
+                   newdata=data_calib,
+                   stype=1)
+    fit_time <- res$time
+    fit_surv <- res$surv
+    score <- rep(0,dim(data_calib)[1])
+    for(i in 1:dim(data_calib)[1]){
+      score[i] <- extract_surv_prob(data_calib$censored_T[i],fit_time,fit_surv[,i])
+    }
+ 
+    #The fitted survival function for the new data
+    newdata <- data.frame(x)
+    colnames(newdata) <- xnames
+    res <- survfit(mdl,
+                  newdata=newdata,
+                  stype=1)
+    test_time <- res$time
+    test_surv <- res$surv
+
+    ## Obtain the calibration term
+    calib_term <- sapply(X=weight_new,get_calibration,score=score,
+                         weight_calib=weight_calib,alpha=alpha)
+
+    ## Obtain the final confidence interval
+    lower_bnd <- rep(0,len_x)
+    for(i in 1:len_x){
+      ind <- min(which(test_surv[,i]<=calib_term[i]))
+      ## What if  the  index does not exist?
+      lower_bnd[i] <- test_time[ind]
+    }
+    }
+
+  lower_bnd <- pmax(lower_bnd,0)
+  return(lower_bnd)
 }

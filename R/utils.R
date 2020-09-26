@@ -1,3 +1,21 @@
+#' Function to extract P(T>t) [to be changed to P(T>=t)] 
+#'
+#'
+extract_surv_prob <- function(t,time,surv){
+  if(t<min(time)){
+    surv_prob <- 1
+  }else{
+    tau <- max(which(t>=time))
+    surv_prob <- surv[tau]
+  }
+  return(surv_prob)
+}
+
+
+
+
+
+
 #' plot the raw data
 #'
 #' @keywords internal

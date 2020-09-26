@@ -3,9 +3,9 @@
 #' The main function to generate a predictive conformal confidence interval for a unit's survival time.
 #'
 #' @param x a vector of the covariate for test point. 
-#' @param r the censoring time for the test point.
+#' @param c the censoring time for the test point.
 #' @param Xtrain a n-by-p matrix of the covariate of the training data.
-#' @param R a length n vector of the censoring time of the training data.
+#' @param C a length n vector of the censoring time of the training data.
 #' @param event a length n vector of indicators if the time observed is censored. TRUE corresponds to NOT censored, and FALSE censored.
 #' @param time  a vevtor of length n, containing the observed survival time.
 #' @param alpha a number between 0 and 1, speciifying the miscoverage rate.
@@ -35,14 +35,15 @@
 #' @export
 
 # function to construct conformal confidence interval
-cfsurv <- function(x,r,Xtrain,R,event,time,
+cfsurv <- function(x,c,Xtrain,C,event,time,
                    alpha=0.05,
-                   type="marginal",
+                   type="quantile",
+                   pr_calib = NULL,
+                   pr_new = NULL,
                    seed = 24601,
                    model = "cox",
                    dist= "weibull",
-                   I_fit = NULL,
-                   h=1){
+                   I_fit = NULL){
   ## Check if the required packages are installed
   ## Solution found from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
   list.of.packages <- c("ggplot2",
@@ -54,15 +55,15 @@ cfsurv <- function(x,r,Xtrain,R,event,time,
                         "tidyverse",
                         "fishmethods",
                         "foreach",
-                        "doParallel")
+                        "doParallel",
+                        "np")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
   if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
   suppressPackageStartupMessages(res <- lapply(X=list.of.packages,FUN=require,character.only=TRUE))
 
   ## Process the input
-  ## Check the length of x and r: only two cases are supported. length(r)=1, or length(r)=length(x)
+  ## Check the length of x and c: only two cases are supported. length(r)=1, or length(r)=length(x)
   X <- Xtrain
-  len_r <- length(r)
   if(is.null(dim(x)[1])){
     len_x <- length(x)
     p <- 1
@@ -80,30 +81,27 @@ cfsurv <- function(x,r,Xtrain,R,event,time,
     pX <- dim(X)[2]
   }
   
-  
-  if(len_r>1 & len_r!=len_x){
-    stop("The length of R is not compatible with that of X!")
-  }
 
   ## Check the type of the model. Only "cox" and "randomforest" are supported
   if(model %in% c("cox","randomforest","pow","portnoy","PengHuang",
                   "cox_scaled","randomforest_scaled")==0) stop("The regression model is not supported.")
 
   ## Check the type of the confidence inteval
-  if(type %in% c("marginal","local")==0) stop("The type of confidence interval is not supported.")
+  if(type %in% c("quantile","percentile")==0) stop("The type of confidence interval is not supported.")
 
   ## Check the value of alpha
   if (alpha>=1 | alpha<=0) stop("The value of alpha is out of bound.")
 
   ## Check the dimensions of the data 
   xnames <- paste0('X', 1:p)
-  if(n != length(R))stop("The number of rows in X does not match the length of R.")
-  if(length(R) != length(event))stop("The length of R does not match the length of event.")
+  if(n != length(C))stop("The number of rows in X does not match the length of R.")
+  if(length(C) != length(event))stop("The length of R does not match the length of event.")
   if(length(event) != length(time))stop("The length of event does not match the length of time.")
   if(p != pX) stop("The dimension of the test point does not match the dimension of the training point.")
 
-  data <- as.data.frame(cbind(R,event,time,X))
-  colnames(data) <- c("R","event","censored_T",xnames)
+  data <- as.data.frame(cbind(C,event,time,X))
+  colnames(data) <- c("C","event","censored_T",xnames)
+
   ## set random seed
   set.seed(seed)
 
@@ -116,58 +114,62 @@ cfsurv <- function(x,r,Xtrain,R,event,time,
   }
   data_fit <- data[I_fit,]
   data_calib <- data[-I_fit,]
+  newdata <- data.frame(x)
+  colnames(newdata) <- xnames
+  
+  ## Computing the weight for the calibration data and the test data
+  if(is.null(pr_calib) | is.null(pr_new)){
+    fmla <- with(data_fit,as.formula(paste("C ~ ", paste(xnames, collapse= "+"))))
+    bw <- npcdistbw(fmla)
+    pr_calib<- 1-npcdist(bws=bw,newdata = data_calib)$condist
+    newdata <- cbind(newdata,C = c)
+    pr_new <- 1-npcdist(bws=bw,newdata=newdata)$condist
+  }
+  
+  weight_calib <- 1/pr_calib
+  weight_new <- 1/pr_new
 
   ## Run the main function and gather resutls
   if(model == "cox"){
-    res = cox_based(x,r,alpha,
+    res = cox_based(x,c,alpha,
                     data_fit,
                     data_calib,
                     type,
                     dist,
-                    h)
+                    weight_calib,
+                    weight_new
+                    )
    }
-  if(model == "cox_scaled"){
-    res = cox_scaled(x,r,alpha,
-                    data_fit,
-                    data_calib,
-                    type,
-                    dist,
-                    h)
-   }
+  
   if(model == "randomforest"){
-    res = rf_based(x,r,alpha,
+    res = rf_based(x,c,alpha,
                    data_fit,
                    data_calib,
-                   type,
-                   h)
+                   type)
   }
   if(model == "randomforest_scaled"){
-    res = rf_scaled(x,r,alpha,
+    res = rf_scaled(x,c,alpha,
                    data_fit,
                    data_calib,
-                   type,
-                   h)
+                   type)
   }
   if(model == "pow"){
-    res = pow_based(x,r,alpha,
+    res = pow_based(x,c,alpha,
                    data_fit,
                    data_calib,
-                   type,
-                   h)
+                   type)
   }
   if(model == "portnoy"){
-    res = portnoy_based(x,r,alpha,
+    res = portnoy_based(x,c,alpha,
                    data_fit,
                    data_calib,
-                   type,
-                   h)
+                   type)
   }
   if(model == "PengHuang"){
-    res = ph_based(x,r,alpha,
+    res = ph_based(x,c,alpha,
                    data_fit,
                    data_calib,
-                   type,
-                   h)
+                   type)
   }
   return(res)
 
