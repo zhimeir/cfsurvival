@@ -6,28 +6,29 @@
 \usage{
 cfsurv(
   x,
-  r,
+  c,
   Xtrain,
-  R,
+  C,
   event,
   time,
   alpha = 0.05,
-  type = "marginal",
+  type = "quantile",
+  pr_calib = NULL,
+  pr_new = NULL,
   seed = 24601,
   model = "cox",
   dist = "weibull",
-  I_fit = NULL,
-  h = 1
+  I_fit = NULL
 )
 }
 \arguments{
 \item{x}{a vector of the covariate for test point.}
 
-\item{r}{the censoring time for the test point.}
+\item{c}{the censoring time for the test point.}
 
 \item{Xtrain}{a n-by-p matrix of the covariate of the training data.}
 
-\item{R}{a length n vector of the censoring time of the training data.}
+\item{C}{a length n vector of the censoring time of the training data.}
 
 \item{event}{a length n vector of indicators if the time observed is censored. TRUE corresponds to NOT censored, and FALSE censored.}
 

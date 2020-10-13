@@ -125,7 +125,6 @@ cfsurv <- function(x,c,Xtrain,C,event,time,
     newdata <- cbind(newdata,C = c)
     pr_new <- 1-npcdist(bws=bw,newdata=newdata)$condist
   }
-  
   weight_calib <- 1/pr_calib
   weight_new <- 1/pr_new
 
