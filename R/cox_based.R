@@ -3,7 +3,7 @@
 #' Construct conformal predictive interval based on cox model
 #'
 #' @param x a vector of the covariate of the test data.
-#' @param r the censoring time of the test data.
+#' @param c the censoring time of the test data.
 #' @param alpha a number betweeo 0 and 1, specifying the miscaverage rate.
 #' @param data_fit a data frame, containing the training data.
 #' @param data_calib a data frame, containing the calibration data.
@@ -24,6 +24,7 @@ cox_based <- function(x,c,alpha,
                       dist,
                       weight_calib,
                       weight_new){
+  ## Check the dimensionality of the input
   if(is.null(dim(x)[1])){
     len_x <- length(x)
     p <- 1
@@ -32,7 +33,8 @@ cox_based <- function(x,c,alpha,
     p <- dim(x)[2]
   }
 
-  ## Keep the data points with C>=c; transform min(T,C) to min(T,c) 
+  ## Keep only the data points with C>=c
+  ## Transform min(T,C) to min(T,c) 
   weight_calib <- weight_calib[data_calib$C>=c]
   data_calib <- data_calib[data_calib$C>=c,]
   data_calib$censored_T <- pmin(data_calib$censored_T,c)
@@ -84,7 +86,7 @@ cox_based <- function(x,c,alpha,
     for(i in 1:dim(data_calib)[1]){
       score[i] <- extract_surv_prob(data_calib$censored_T[i],fit_time,fit_surv[,i])
     }
- 
+
     #The fitted survival function for the new data
     newdata <- data.frame(x)
     colnames(newdata) <- xnames
@@ -103,8 +105,11 @@ cox_based <- function(x,c,alpha,
     for(i in 1:len_x){
       ind <- min(which(test_surv[,i]<=calib_term[i]))
       ## What if  the  index does not exist?
+      if(calib_term[i]<1){
+        ind <- ind+1
+      }
       lower_bnd[i] <- test_time[ind]
-    }
+      }
     }
 
   lower_bnd <- pmax(lower_bnd,0)

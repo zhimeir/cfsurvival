@@ -19,6 +19,8 @@ cox_based(
 \arguments{
 \item{x}{a vector of the covariate of the test data.}
 
+\item{c}{the censoring time of the test data.}
+
 \item{alpha}{a number betweeo 0 and 1, specifying the miscaverage rate.}
 
 \item{data_fit}{a data frame, containing the training data.}
@@ -28,8 +30,6 @@ cox_based(
 \item{type}{either "marginal" or "local". Determines the type of confidence interval.}
 
 \item{dist}{The distribution of T used in the cox model.}
-
-\item{r}{the censoring time of the test data.}
 }
 \value{
 low_ci a value of the lower bound for the survival time of the test point.
