@@ -51,7 +51,8 @@ cox_based <- function(x,c,alpha,
                   type="quantile",
                   p=alpha)
     quant <-  res  
-    score <- pmin(data_calib$C,quant)-data_calib$censored_T
+    ##     score <- pmin(data_calib$C,quant)-data_calib$censored_T
+    score <- pmin(c,quant)-data_calib$censored_T
   
     ## The fitted quantile for the new data
     newdata <- data.frame(x)
@@ -65,7 +66,6 @@ cox_based <- function(x,c,alpha,
     ## Compute the calibration term
     calib_term <- sapply(X=weight_new,get_calibration,score=score,
                         weight_calib=weight_calib,alpha=alpha)
-
     ## obtain final confidence interval
     lower_bnd <- pmin(new_quant,c)-calib_term
     }
