@@ -6,11 +6,7 @@ extract_surv_prob <- function(t,time,surv){
     surv_prob <- 1
   }else{
     tau <- max(which(t>=time))
-    if(tau>1){
-      surv_prob <- surv[tau-1]
-    }else{
-      surv_prob <- 1 
-    }
+    surv_prob <- surv[tau]
   }
   return(surv_prob)
 }

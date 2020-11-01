@@ -74,27 +74,33 @@ cox_based <- function(x,c,alpha,
     ## Fit the model
     xnames <- paste0("X",1:p)
     fmla <- as.formula(paste("Surv(censored_T, event) ~ ", paste(xnames, collapse= "+")))
-    mdl <- coxph(fmla,data=data_fit)
+    ##     mdl <- coxph(fmla,data=data_fit)
+    mdl <- survreg(fmla,data=data_fit,dist="weibull")
+    shape <- 1/mdl$scale
+    scale <- exp(coef(mdl)[1])
+    coef <- coef(mdl)[-1]
+    score <- unlist(map2(data_calib$X1,data_calib$censored_T,
+                  get_survival_fun,shape,scale,coef))
 
     ## Extract the fitted survival function
-    res <- survfit(mdl,
-                   newdata=data_calib,
-                   stype=1)
-    fit_time <- res$time
-    fit_surv <- res$surv
-    score <- rep(0,dim(data_calib)[1])
-    for(i in 1:dim(data_calib)[1]){
-      score[i] <- extract_surv_prob(data_calib$censored_T[i],fit_time,fit_surv[,i])
-    }
+    ##     res <- survfit(mdl,
+    ##                    newdata=data_calib,
+    ##                    stype=1)
+    ##     fit_time <- res$time
+    ##     fit_surv <- res$surv
+    ##     score <- rep(0,dim(data_calib)[1])
+    ##     for(i in 1:dim(data_calib)[1]){
+    ##       score[i] <- extract_surv_prob(data_calib$censored_T[i],fit_time,fit_surv[,i])
+    ##     }
 
     #The fitted survival function for the new data
-    newdata <- data.frame(x)
-    colnames(newdata) <- xnames
-    res <- survfit(mdl,
-                  newdata=newdata,
-                  stype=1)
-    test_time <- res$time
-    test_surv <- res$surv
+    ##     newdata <- data.frame(x)
+    ##     colnames(newdata) <- xnames
+    ##     res <- survfit(mdl,
+    ##                   newdata=newdata,
+    ##                   stype=1)
+    ##     test_time <- res$time
+    ##     test_surv <- res$surv
 
     ## Obtain the calibration term
     calib_term <- sapply(X=weight_new,get_calibration,score=score,
@@ -103,15 +109,20 @@ cox_based <- function(x,c,alpha,
     ## Obtain the final confidence interval
     lower_bnd <- rep(0,len_x)
     for(i in 1:len_x){
-      ind <- min(which(test_surv[,i]<=calib_term[i]))
-      ## What if  the  index does not exist?
-      if(calib_term[i]<1){
-        ind <- ind+1
-      }
-      lower_bnd[i] <- test_time[ind]
+      ## ind <- min(which(test_surv[,i]<=calib_term[i]))
+      ## What if the index does not exist?
+      lower_bnd[i] <- scale*(-log(calib_term[i])*exp(-coef*data_test$X1[i]))^(1/shape)
       }
     }
-
+ 
   lower_bnd <- pmax(lower_bnd,0)
+  lower_bnd <- pmin(lower_bnd,c)
   return(lower_bnd)
+}
+
+
+get_survival_fun <- function(x,t,sh,sc,coef){
+  s <- -(t/sc)^sh*exp(coef*x)
+  s <- exp(s)
+  return(s)
 }
