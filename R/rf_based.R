@@ -22,6 +22,12 @@ rf_based <- function(x,c,alpha,
                      data_calib,
                      weight_calib,
                      weight_new){
+  
+  ## Keep only the data points with C>=c and transform min(T,C) to min(T,c) 
+  weight_calib <- weight_calib[data_calib$C>=c]
+  data_calib <- data_calib[data_calib$C>=c,]
+  data_calib$censored_T <- pmin(data_calib$censored_T,c)
+  
   ## Parameters
   n_calib <- dim(data_calib)[1]
   if(is.null(dim(x)[1])){
@@ -36,10 +42,6 @@ rf_based <- function(x,c,alpha,
     data_test <- rbind(data_calib[,colnames(data_calib)%in%xnames],x)
   }
 
-  ## Keep only the data points with C>=c and transform min(T,C) to min(T,c) 
-  weight_calib <- weight_calib[data_calib$C>=c]
-  data_calib <- data_calib[data_calib$C>=c,]
-  data_calib$censored_T <- pmin(data_calib$censored_T,c)
 
   ## Fit the model
   ntree <- 1000
