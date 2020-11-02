@@ -4,18 +4,18 @@
 \alias{portnoy_based}
 \title{Confidence interval based on Portnoy (2003)}
 \usage{
-portnoy_based(x, r, alpha, data_fit, data_calib, type, h)
+portnoy_based(x, c, alpha, data_fit, data_calib, weight_calib, weight_new)
 }
 \arguments{
 \item{x}{a vector of the covariate of the test data.}
-
-\item{r}{the censoring time of the test data.}
 
 \item{alpha}{a number betweeo 0 and 1, specifying the miscaverage rate.}
 
 \item{data_fit}{a data frame, containing the training data.}
 
 \item{data_calib}{a data frame, containing the calibration data.}
+
+\item{r}{the censoring time of the test data.}
 
 \item{type}{either "marginal" or "local". Determines the type of confidence interval.}
 }

@@ -17,12 +17,11 @@
 #'
 #' @export
 
-rf_based <- function(x,r,
-                     alpha,
+rf_based <- function(x,c,alpha,
                      data_fit,
                      data_calib,
-                     type,
-                     h){
+                     weight_calib,
+                     weight_new){
   ## Parameters
   n_calib <- dim(data_calib)[1]
   if(is.null(dim(x)[1])){
@@ -36,14 +35,19 @@ rf_based <- function(x,r,
     xnames <- paste0("X",1:p)
     data_test <- rbind(data_calib[,colnames(data_calib)%in%xnames],x)
   }
-  len_r <- length(r)
+
+  ## Keep only the data points with C>=c and transform min(T,C) to min(T,c) 
+  weight_calib <- weight_calib[data_calib$C>=c]
+  data_calib <- data_calib[data_calib$C>=c,]
+  data_calib$censored_T <- pmin(data_calib$censored_T,c)
+
+  ## Fit the model
   ntree <- 1000
   nodesize <- 80
 
   data_test <- data.frame(data_test)
   names(data_test) <- xnames
   fmla <- as.formula(paste("censored_T ~ ",paste(xnames,collapse="+")))
-  ## Fit the model
   mdl <- crf.km(fmla, ntree = ntree, 
                  nodesize = nodesize,
                  data_train = data_fit[,names(data_fit)%in%
@@ -53,41 +57,16 @@ rf_based <- function(x,r,
                  iname = 'event',
                  tau = alpha,
                  method = "grf")
-  quant_lo <- mdl$predicted[1:n_calib]
-  new_quant_lo <- tail(mdl$predicted,-n_calib)
+  quant <- mdl$predicted[1:n_calib]
+  new_quant <- tail(mdl$predicted,-n_calib)
+  score <- pmin(c,quant)-data_calib$censored_T
+  
+  ## Compute the calibration term
+  calib_term <- sapply(X=weight_new,get_calibration,score=score,
+                      weight_calib=weight_calib,alpha=alpha)
   ## obtain final confidence interval
-  if(type == "marginal"){
-    res <- lower_ci(x,
-                  r=r,
-                  alpha=alpha,
-                  data=data_calib,
-                  quant_lo =quant_lo,
-                  new_quant_lo=new_quant_lo)
-    return(res)
-    } 
-    if(type == "local"){
-      ## When there is only one value for r
-      if(len_r==1){
-        res <- lower_ci_local(x=x,
-                              r=r,
-                              alpha=alpha,
-                              data=data_calib,
-                              quant_lo =quant_lo,
-                              new_quant_lo=new_quant_lo,
-                              h=h)
-        return(res)
-      }
-
-      ## When there are multiple pairs of (x,r)
-      if(len_x == len_r & len_x>1){
-        res <- pmap(list(x=x,r=r,new_quant_lo = new_quant_lo),
-                    lower_ci_local,
-                    alpha=alpha,
-                    quant_lo = quant_lo,
-                    data=data_calib,
-                    h=h)
-        return(res)
-      }
-    }
-
+  lower_bnd <- pmin(new_quant,c)-calib_term
+  lower_bnd <- pmax(lower_bnd,0)
+  lower_bnd <- pmin(lower_bnd,c)
+  return(lower_bnd)
 }

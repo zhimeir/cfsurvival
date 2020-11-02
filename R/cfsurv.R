@@ -143,26 +143,30 @@ cfsurv <- function(x,c,Xtrain,C,event,time,
     res = rf_based(x,c,alpha,
                    data_fit,
                    data_calib,
-                   type)
+                   weight_calib,
+                   weight_new)
   }
   
   if(model == "pow"){
     res = pow_based(x,c,alpha,
                    data_fit,
                    data_calib,
-                   type)
+                   weight_calib,
+                   weight_new)
   }
   if(model == "portnoy"){
     res = portnoy_based(x,c,alpha,
                    data_fit,
                    data_calib,
-                   type)
+                   weight_calib,
+                   weight_new)
   }
   if(model == "PengHuang"){
     res = ph_based(x,c,alpha,
                    data_fit,
                    data_calib,
-                   type)
+                   weight_calib,
+                   weight_new)
   }
   return(res)
 
