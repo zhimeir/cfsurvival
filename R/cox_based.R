@@ -71,16 +71,24 @@ cox_based <- function(x,c,alpha,
     }
 
   if(type == "percentile"){
-    ## Fit the model
+    ## Fit the model for S(y)=p(min(T,c)>=y|X)
     xnames <- paste0("X",1:p)
-    fmla <- as.formula(paste("Surv(censored_T, event) ~ ", paste(xnames, collapse= "+")))
+    data_fit <- data_fit[data_fit$C>=c,]
+    data_fit$censored_T <- pmin(data_fit$censored_T,c)
+    
+    fmla <- with(data_fit,as.formula(paste("censored_T ~ ", paste(xnames, collapse= "+"))))
+    bw <- npcdistbw(fmla)
+    score<- 1-npcdist(bws=bw,newdata = data_calib)$condist
+    
+
+    ##     fmla <- as.formula(paste("Surv(censored_T, event) ~ ", paste(xnames, collapse= "+")))
     ##     mdl <- coxph(fmla,data=data_fit)
-    mdl <- survreg(fmla,data=data_fit,dist="weibull")
-    shape <- 1/mdl$scale
-    scale <- exp(coef(mdl)[1])
-    coef <- coef(mdl)[-1]
-    score <- unlist(map2(data_calib$X1,data_calib$censored_T,
-                  get_survival_fun,shape,scale,coef))
+    ##     mdl <- survreg(fmla,data=data_fit,dist="weibull")
+    ##     shape <- 1/mdl$scale
+    ##     scale <- exp(coef(mdl)[1])
+    ##     coef <- coef(mdl)[-1]
+    ##     score <- unlist(map2(data_calib$X1,data_calib$censored_T,
+    ##                   get_survival_fun,shape,scale,coef))
 
     ## Extract the fitted survival function
     ##     res <- survfit(mdl,
@@ -94,8 +102,6 @@ cox_based <- function(x,c,alpha,
     ##     }
 
     #The fitted survival function for the new data
-    ##     newdata <- data.frame(x)
-    ##     colnames(newdata) <- xnames
     ##     res <- survfit(mdl,
     ##                   newdata=newdata,
     ##                   stype=1)
@@ -108,10 +114,13 @@ cox_based <- function(x,c,alpha,
 
     ## Obtain the final confidence interval
     lower_bnd <- rep(0,len_x)
+    newdata <- data.frame(x)
+    colnames(newdata) <- xnames
     for(i in 1:len_x){
-      ## ind <- min(which(test_surv[,i]<=calib_term[i]))
-      ## What if the index does not exist?
-      lower_bnd[i] <- scale*(-log(calib_term[i])*exp(-coef*data_test$X1[i]))^(1/shape)
+      time_candidate <- seq(0,c+2,by=.1)
+      score_candidate <- sapply(time_candidate,get_survival_fun,x = newdata[i,],bw=bw,xnames=xnames)
+      ind <- min(which(score_candidate<=calib_term[i]))
+      lower_bnd[i] <- time_candidate[ind]
       }
     }
  
@@ -121,8 +130,10 @@ cox_based <- function(x,c,alpha,
 }
 
 
-get_survival_fun <- function(x,t,sh,sc,coef){
-  s <- -(t/sc)^sh*exp(coef*x)
-  s <- exp(s)
-  return(s)
+get_survival_fun <- function(x,t,bw,xnames){
+  input_data <- data.frame(x)
+  colnames(input_data) <- xnames
+  input_data <- cbind(input_data,censored_T=t)
+  val<- 1-npcdist(bws=bw,newdata=input_data)$condist
+  return(val)
 }
