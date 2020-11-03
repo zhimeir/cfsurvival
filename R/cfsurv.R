@@ -121,13 +121,15 @@ cfsurv <- function(x,c,Xtrain,C,event,time,
   if(is.null(pr_calib) | is.null(pr_new)){
     fmla <- with(data_fit,as.formula(paste("C ~ ", paste(xnames, collapse= "+"))))
     bw <- npcdistbw(fmla)
-    pr_calib<- 1-npcdist(bws=bw,newdata = data_calib)$condist
+    newdata_calib <- data_calib
+    newdata_calib$C <- c
+    pr_calib<- 1-npcdist(bws=bw,newdata = newdata_calib)$condist
     newdata <- cbind(newdata,C = c)
     pr_new <- 1-npcdist(bws=bw,newdata=newdata)$condist
   }
   weight_calib <- 1/pr_calib
   weight_new <- 1/pr_new
-
+  
   ## Run the main function and gather resutls
   if(model == "cox"){
     res = cox_based(x,c,alpha,
