@@ -29,10 +29,4 @@ includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
 \description{
 construct the one-sided confidence interval for a unit's survival time T
 }
-\seealso{
-Other confint: 
-\code{\link{lower_ci_local}()},
-\code{\link{lower_ci}()},
-\code{\link{scaled_lower_ci}()}
-}
 \concept{confint}

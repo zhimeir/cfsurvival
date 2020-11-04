@@ -9,3 +9,4 @@ extract_surv_prob(t, time, surv)
 \description{
 Function to extract P(T>t) [to be changed to P(T>=t)]
 }
+\keyword{internal}

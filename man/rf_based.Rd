@@ -4,7 +4,7 @@
 \alias{rf_based}
 \title{Confidence interval based on random forest}
 \usage{
-rf_based(x, c, alpha, data_fit, data_calib, weighht_calib, weight_new)
+rf_based(x, c, alpha, data_fit, data_calib, weight_calib, weight_new)
 }
 \arguments{
 \item{x}{a vector of the covariate of the test data.}
@@ -31,12 +31,9 @@ Construct a conformal predictive confidence interval based on random forest
 }
 \seealso{
 Other model: 
-\code{\link{adaptive_cox_based}()},
 \code{\link{cox_based}()},
-\code{\link{cox_scaled}()},
 \code{\link{ph_based}()},
 \code{\link{portnoy_based}()},
-\code{\link{pow_based}()},
-\code{\link{rf_scaled}()}
+\code{\link{pow_based}()}
 }
 \concept{model}
