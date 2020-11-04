@@ -1,6 +1,6 @@
 #' Fitting the censoring probability P(C>=c|X)
 #'
-#' @keywords internal
+#' @export
 
 censoring_prob <- function(data_fit,
                            data_calib,
