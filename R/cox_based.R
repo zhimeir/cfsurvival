@@ -51,7 +51,6 @@ cox_based <- function(x,c,alpha,
                   type="quantile",
                   p=alpha)
     quant <-  res  
-    ##     score <- pmin(data_calib$C,quant)-data_calib$censored_T
     score <- pmin(c,quant)-data_calib$censored_T
   
     ## The fitted quantile for the new data
@@ -77,37 +76,9 @@ cox_based <- function(x,c,alpha,
     data_fit$censored_T <- pmin(data_fit$censored_T,c)
     
     fmla <- with(data_fit,as.formula(paste("censored_T ~ ", paste(xnames, collapse= "+"))))
-    bw <- npcdistbw(fmla)
+    capture.output(bw <- npcdistbw(fmla),file='NULL')
     score<- 1-npcdist(bws=bw,newdata = data_calib)$condist
     
-
-    ##     fmla <- as.formula(paste("Surv(censored_T, event) ~ ", paste(xnames, collapse= "+")))
-    ##     mdl <- coxph(fmla,data=data_fit)
-    ##     mdl <- survreg(fmla,data=data_fit,dist="weibull")
-    ##     shape <- 1/mdl$scale
-    ##     scale <- exp(coef(mdl)[1])
-    ##     coef <- coef(mdl)[-1]
-    ##     score <- unlist(map2(data_calib$X1,data_calib$censored_T,
-    ##                   get_survival_fun,shape,scale,coef))
-
-    ## Extract the fitted survival function
-    ##     res <- survfit(mdl,
-    ##                    newdata=data_calib,
-    ##                    stype=1)
-    ##     fit_time <- res$time
-    ##     fit_surv <- res$surv
-    ##     score <- rep(0,dim(data_calib)[1])
-    ##     for(i in 1:dim(data_calib)[1]){
-    ##       score[i] <- extract_surv_prob(data_calib$censored_T[i],fit_time,fit_surv[,i])
-    ##     }
-
-    #The fitted survival function for the new data
-    ##     res <- survfit(mdl,
-    ##                   newdata=newdata,
-    ##                   stype=1)
-    ##     test_time <- res$time
-    ##     test_surv <- res$surv
-
     ## Obtain the calibration term
     calib_term <- sapply(X=weight_new,get_calibration,score=score,
                          weight_calib=weight_calib,alpha=alpha)
