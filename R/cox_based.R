@@ -74,10 +74,15 @@ cox_based <- function(x,c,alpha,
     xnames <- paste0("X",1:p)
     data_fit <- data_fit[data_fit$C>=c,]
     data_fit$censored_T <- pmin(data_fit$censored_T,c)
-    
-    fmla <- with(data_fit,as.formula(paste("censored_T ~ ", paste(xnames, collapse= "+"))))
+   
+    surv_data_fit <- data_fit
+    surv_data_fit$censored_T <- -surv_data_fit$censored_T
+    fmla <- with(surv_data_fit,as.formula(paste("censored_T ~ ", paste(xnames, collapse= "+"))))
     capture.output(bw <- npcdistbw(fmla),file='NULL')
-    score<- 1-npcdist(bws=bw,newdata = data_calib)$condist
+
+    surv_data_calib <- data_calib
+    surv_data_calib$censored_T <- -surv_data_calib$censored_T
+    score<- npcdist(bws=bw,newdata = surv_data_calib)$condist
     
     ## Obtain the calibration term
     calib_term <- sapply(X=weight_new,get_calibration,score=score,
@@ -89,7 +94,7 @@ cox_based <- function(x,c,alpha,
     colnames(newdata) <- xnames
     for(i in 1:len_x){
       time_candidate <- seq(0,c+2,by=.1)
-      score_candidate <- sapply(time_candidate,get_survival_fun,x = newdata[i,],bw=bw,xnames=xnames)
+      score_candidate <- sapply(-time_candidate,get_survival_fun,x = newdata[i,],bw=bw,xnames=xnames)
       ind <- min(which(score_candidate<=calib_term[i]))
       lower_bnd[i] <- time_candidate[ind-1]
       }
@@ -105,6 +110,6 @@ get_survival_fun <- function(x,t,bw,xnames){
   input_data <- data.frame(x)
   colnames(input_data) <- xnames
   input_data <- cbind(input_data,censored_T=t)
-  val<- 1-npcdist(bws=bw,newdata=input_data)$condist
+  val<- npcdist(bws=bw,newdata=input_data)$condist
   return(val)
 }
