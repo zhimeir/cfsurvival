@@ -94,9 +94,13 @@ cox_based <- function(x,c,alpha,
     colnames(newdata) <- xnames
     for(i in 1:len_x){
       time_candidate <- seq(0,c+2,by=.1)
-      score_candidate <- sapply(-time_candidate,get_survival_fun,x = newdata[i,],bw=bw,xnames=xnames)
+      score_candidate <- sapply(-time_candidate,get_survival_fun,x = newdata[i,],bw=bw,xnames=xnames) 
       ind <- min(which(score_candidate<=calib_term[i]))
-      lower_bnd[i] <- time_candidate[ind-1]
+      if(ind>1){
+        lower_bnd[i] <- time_candidate[ind-1]
+      }else{
+        lower_bnd[i] <- 0
+      }
       }
     }
  
