@@ -4,7 +4,7 @@
 \alias{censoring_prob}
 \title{Fitting the censoring probability P(C>=c|X)}
 \usage{
-censoring_prob(fit, calib, test, xnames, c)
+censoring_prob(fit, calib, test = NULL, xnames, c)
 }
 \description{
 Fitting the censoring probability P(C>=c|X)

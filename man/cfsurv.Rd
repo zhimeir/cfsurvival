@@ -6,15 +6,15 @@
 \usage{
 cfsurv(
   x,
-  c,
+  c_list = NULL,
+  pr_list = NULL,
+  pr_new_list = NULL,
   Xtrain,
   C,
   event,
   time,
   alpha = 0.05,
   type = "quantile",
-  pr_calib = NULL,
-  pr_new = NULL,
   seed = 24601,
   model = "cox",
   dist = "weibull",
@@ -23,8 +23,6 @@ cfsurv(
 }
 \arguments{
 \item{x}{a vector of the covariate for test point.}
-
-\item{c}{the censoring time for the test point.}
 
 \item{Xtrain}{a n-by-p matrix of the covariate of the training data.}
 
@@ -41,6 +39,8 @@ cfsurv(
 \item{model}{Options include "cox", "randomforest", "Powell", "Portnoy" and "PengHuang". This determines the model used to fit the condditional quantile (default: "cox").}
 
 \item{dist}{either "weibull", "exponential" or "gaussian" (default: "weibull"). The distribution of T used in the cox model.}
+
+\item{c}{the censoring time for the test point.}
 
 \item{h}{the bandwidth for the local confidence interval. Default is 1.}
 }

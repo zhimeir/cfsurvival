@@ -35,11 +35,12 @@
 #' @export
 
 # function to construct conformal confidence interval
-cfsurv <- function(x,c,Xtrain,C,event,time,
+cfsurv <- function(x,c_list=NULL,
+                   pr_list=NULL,
+                   pr_new_list=NULL,
+                   Xtrain,C,event,time,
                    alpha=0.05,
                    type="quantile",
-                   pr_calib = NULL,
-                   pr_new = NULL,
                    seed = 24601,
                    model = "cox",
                    dist= "weibull",
@@ -117,15 +118,51 @@ cfsurv <- function(x,c,Xtrain,C,event,time,
   newdata <- data.frame(x)
   colnames(newdata) <- xnames
   
-  ## Computing the weight for the calibration data and the test data
-  if(is.null(pr_calib) | is.null(pr_new)){
-    res <- censoring_prob(data_fit,data_calib,newdata,xnames,c)
-    pr_calib <- res$pr_calib
-    pr_new <- res$pr_new
+  ## If c is not specified, select c automatically 
+  if(is.null(c_list)){
+    ref_length <- 10
+    c_list <- seq(min(data_fit$C),max(data_fit$C),length=ref_length)
   }
+  
+  if(length(c_list)==1){
+    c <- c_list
+    if(is.null(pr_list) | is.null(pr_new_list)){
+      res <- censoring_prob(data_fit,data_calib,newdata,xnames,c)
+      pr_calib <- res$pr_calib
+      pr_new <- res$pr_new
+    }else{
+      pr_calib <- pr_list[-I_fit]
+      pr_new <- pr_new_list
+    }
+  }else{
+    if(is.null(pr_list) | is.null(pr_new_list)){
+      res <- selection_c(X=data_fit$X,C=data_fit$C,
+                      event=data_fit$event,
+                      time=data_fit$censored_T,
+                      alpha,c_ref=c_list,
+                      type=type,dist=dist)
+      c <- res$c_opt
+      res <- censoring_prob(data_fit,data_calib,newdata,xnames,c)
+      pr_calib <- res$pr_calib
+      pr_new <- res$pr_new
+    }else{
+      weight_ref <- 1/pr_list[I_fit,]
+      res <- selection_c(X=data_fit$X,C=data_fit$C,
+                      event=data_fit$event,
+                      time=data_fit$censored_T,
+                      alpha,c_ref=c_list,
+                      weight_ref=weight_ref,
+                      type=type,dist=dist)
+      c <- res$c_opt
+      pr_calib <- pr_list[,c_list==c] 
+      pr_new <- pr_new_list[,c_list==c]
+    }
+  }
+
+  ## Computing the weight for the calibration data and the test data
   weight_calib <- 1/pr_calib
   weight_new <- 1/pr_new
-  
+
   ## Run the main function and gather resutls
   if(model == "cox"){
     res = cox_based(x,c,alpha,

@@ -2,7 +2,7 @@
 #'
 #' @export
 
-censoring_prob <- function(fit,calib,test,
+censoring_prob <- function(fit,calib,test=NULL,
                            xnames,c){
 
   ## Fitting P(-C<=-c_0|X) (since P(C>=c_0|X)=P(-C<=-c_0|X))
@@ -16,11 +16,12 @@ censoring_prob <- function(fit,calib,test,
   pr_calib<- npcdist(bws=bw,newdata = newdata_calib)$condist
 
   ## Computing the censoring scores for the test data
-  newdata <- cbind(data_test,C=-c)
-  newdata <- data.frame(newdata)
-  colnames(newdata) <- c(xnames,"C")
-  pr_new <- npcdist(bws=bw,newdata=newdata)$condist
-
+  if(!is.null(test)){
+    newdata <- cbind(test,C=-c)
+    newdata <- data.frame(newdata)
+    colnames(newdata) <- c(xnames,"C")
+    pr_new <- npcdist(bws=bw,newdata=newdata)$condist
+  }else{pr_new=NULL}
   return(list(pr_calib=pr_calib,pr_new=pr_new))
 }
 
