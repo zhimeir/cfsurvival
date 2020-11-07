@@ -154,7 +154,7 @@ cfsurv <- function(x,c_list=NULL,
                       weight_ref=weight_ref,
                       type=type,dist=dist)
       c <- res$c_opt
-      pr_calib <- pr_list[,c_list==c] 
+      pr_calib <- pr_list[-I_fit,c_list==c] 
       pr_new <- pr_new_list[,c_list==c]
     }
   }
