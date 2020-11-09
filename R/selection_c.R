@@ -71,7 +71,7 @@ evaluate_length <- function(c,alpha,n,p,
     bnd <- cox_based(x,c,alpha,
                      data_fit,
                      data_calib,
-                     type,
+                     type = "quantile",
                      dist,
                      weight_calib,
                      weight_new)
