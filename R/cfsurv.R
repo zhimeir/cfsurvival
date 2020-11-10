@@ -136,29 +136,30 @@ cfsurv <- function(x,c_list=NULL,
     }
   }else{
     if(is.null(pr_list) | is.null(pr_new_list)){
-      res <- selection_c(X=data_fit$X,C=data_fit$C,
-                      event=data_fit$event,
-                      time=data_fit$censored_T,
-                      alpha,c_ref=c_list,
-                      type=type,dist=dist)
+      res <- selection_c(X=data_fit[,colnames(data_fit)%in%xnames],
+                         C=data_fit$C,
+                        event=data_fit$event,
+                        time=data_fit$censored_T,
+                        alpha,c_ref=c_list,
+                        type=type,dist=dist)
       c <- res$c_opt
       res <- censoring_prob(data_fit,data_calib,newdata,xnames,c)
       pr_calib <- res$pr_calib
       pr_new <- res$pr_new
     }else{
       weight_ref <- 1/pr_list[I_fit,]
-      res <- selection_c(X=data_fit$X,C=data_fit$C,
-                      event=data_fit$event,
-                      time=data_fit$censored_T,
-                      alpha,c_ref=c_list,
-                      weight_ref=weight_ref,
-                      type=type,dist=dist)
+      res <- selection_c(X=data_fit[,colnames(data_fit)%in%xnames],
+                         C=data_fit$C,
+                         event=data_fit$event,
+                         time=data_fit$censored_T,
+                         alpha,c_ref=c_list,
+                         weight_ref=weight_ref,
+                         type=type,dist=dist)
       c <- res$c_opt
       pr_calib <- pr_list[-I_fit,c_list==c] 
       pr_new <- pr_new_list[,c_list==c]
     }
   }
-
   ## Computing the weight for the calibration data and the test data
   weight_calib <- 1/pr_calib
   weight_new <- 1/pr_new
