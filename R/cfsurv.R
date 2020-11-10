@@ -138,10 +138,11 @@ cfsurv <- function(x,c_list=NULL,
     if(is.null(pr_list) | is.null(pr_new_list)){
       res <- selection_c(X=data_fit[,colnames(data_fit)%in%xnames],
                          C=data_fit$C,
-                        event=data_fit$event,
-                        time=data_fit$censored_T,
-                        alpha,c_ref=c_list,
-                        type=type,dist=dist)
+                         event=data_fit$event,
+                         time=data_fit$censored_T,
+                         weight_ref=NULL,
+                         alpha,c_ref=c_list,
+                         type=type,dist=dist)
       c <- res$c_opt
       res <- censoring_prob(data_fit,data_calib,newdata,xnames,c)
       pr_calib <- res$pr_calib
