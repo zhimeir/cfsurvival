@@ -51,7 +51,7 @@ cqr <- function(x,Xtrain,Ytrain,
   ## Get the calibration term
   corr_term <- quantile(c(score,Inf),1-alpha)
   lower_bnd <- new_quant-corr_term
-eturn(lower_bnd)
+  return(lower_bnd)
 
 
 }
