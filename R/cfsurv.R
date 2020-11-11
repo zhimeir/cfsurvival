@@ -175,7 +175,9 @@ cfsurv <- function(x,c_list=NULL,
                     type,
                     dist,
                     weight_calib,
-                    weight_new)
+                    weight_new,
+                    ftol,
+                    tol)
    }
   
   if(model == "randomforest"){
