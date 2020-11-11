@@ -44,7 +44,9 @@ cfsurv <- function(x,c_list=NULL,
                    seed = 24601,
                    model = "cox",
                    dist= "weibull",
-                   I_fit = NULL){
+                   I_fit = NULL,
+                   ftol=.1,tol=.1
+                   ){
   ## Check if the required packages are installed
   ## Solution found from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
   list.of.packages <- c("ggplot2",
@@ -127,7 +129,7 @@ cfsurv <- function(x,c_list=NULL,
   if(length(c_list)==1){
     c <- c_list
     if(is.null(pr_list) | is.null(pr_new_list)){
-      res <- censoring_prob(data_fit,data_calib,newdata,xnames,c)
+      res <- censoring_prob(data_fit,data_calib,newdata,xnames,c,ftol,tol)
       pr_calib <- res$pr_calib
       pr_new <- res$pr_new
     }else{
@@ -144,7 +146,7 @@ cfsurv <- function(x,c_list=NULL,
                          alpha,c_ref=c_list,
                          type=type,dist=dist)
       c <- res$c_opt
-      res <- censoring_prob(data_fit,data_calib,newdata,xnames,c)
+      res <- censoring_prob(data_fit,data_calib,newdata,xnames,c,ftol,tol)
       pr_calib <- res$pr_calib
       pr_new <- res$pr_new
     }else{

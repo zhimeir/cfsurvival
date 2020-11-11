@@ -23,7 +23,8 @@ cox_based <- function(x,c,alpha,
                       type,
                       dist,
                       weight_calib,
-                      weight_new){
+                      weight_new,
+                      ftol=.1,tol=.1){
   ## Check the dimensionality of the input
   if(is.null(dim(x)[1])){
     len_x <- length(x)
@@ -78,7 +79,11 @@ cox_based <- function(x,c,alpha,
     surv_data_fit <- data_fit
     surv_data_fit$censored_T <- -surv_data_fit$censored_T
     fmla <- with(surv_data_fit,as.formula(paste("censored_T ~ ", paste(xnames, collapse= "+"))))
-    capture.output(bw <- npcdistbw(fmla),file='NULL')
+    if(p==1){
+      capture.output(bw <- npcdistbw(fmla),file='NULL')
+    }else{
+      capture.output(bw <- npcdistbw(fmla,ftol=ftol,tol=tol),file='NULL')
+    }
 
     surv_data_calib <- data_calib
     surv_data_calib$censored_T <- -surv_data_calib$censored_T

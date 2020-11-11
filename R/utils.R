@@ -3,7 +3,7 @@
 #' @export
 
 censoring_prob <- function(fit,calib,test=NULL,
-                           xnames,c){
+                           xnames,c,ftol=.1,tol=.1){
 
   ## Fitting P(-C<=-c_0|X) (since P(C>=c_0|X)=P(-C<=-c_0|X))
   fit$C <- -fit$C
@@ -11,7 +11,7 @@ censoring_prob <- function(fit,calib,test=NULL,
   if(length(xnames)==1){
     capture.output(bw <- npcdistbw(fmla),file ='NULL')
   }else{
-    capture.output(bw <- npcdistbw(fmla,ftol=.1,to=.1),file ='NULL')
+    capture.output(bw <- npcdistbw(fmla,ftol=ftol,tol=tol),file ='NULL')
   }
 
   ## Computing censoring scores for the calibration data
