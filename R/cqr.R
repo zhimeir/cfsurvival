@@ -6,6 +6,8 @@ cqr <- function(x,Xtrain,Ytrain,
                 alpha=0.05,
                 I_fit=NULL,seed=24601){
 
+  X <- Xtrain
+  Y <- Ytrain
   set.seed(seed)
   if(is.null(dim(X)[1])){
     n <- length(X)
@@ -15,8 +17,6 @@ cqr <- function(x,Xtrain,Ytrain,
     p <- dim(X)[2]
   }
   xnames <- paste0('X', 1:p)
-  X <- Xtrain
-  Y <- Ytrain
   data <- as.data.frame(cbind(Y,X))
   colnames(data) <- c("Y",xnames)
 
@@ -51,7 +51,7 @@ cqr <- function(x,Xtrain,Ytrain,
   ## Get the calibration term
   corr_term <- quantile(c(score,Inf),1-alpha)
   lower_bnd <- new_quant-corr_term
-  return(lower_bnd)
+eturn(lower_bnd)
 
 
 }
