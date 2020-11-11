@@ -8,7 +8,11 @@ censoring_prob <- function(fit,calib,test=NULL,
   ## Fitting P(-C<=-c_0|X) (since P(C>=c_0|X)=P(-C<=-c_0|X))
   fit$C <- -fit$C
   fmla <- with(fit,as.formula(paste("C ~ ", paste(xnames, collapse= "+"))))
-  capture.output(bw <- npcdistbw(fmla),file ='NULL')
+  if(length(xnames)==1){
+    capture.output(bw <- npcdistbw(fmla),file ='NULL')
+  }else{
+    capture.output(bw <- npcdistbw(fmla,ftol=.1,to=.1),file ='NULL')
+  }
 
   ## Computing censoring scores for the calibration data
   newdata_calib <- calib
