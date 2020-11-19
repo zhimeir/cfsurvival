@@ -59,6 +59,7 @@ cfsurv <- function(x,c_list=NULL,
                         "fishmethods",
                         "foreach",
                         "doParallel",
+                        "gbm",
                         "np")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
   if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
@@ -86,7 +87,7 @@ cfsurv <- function(x,c_list=NULL,
   
 
   ## Check the type of the model. Only "cox" and "randomforest" are supported
-  if(model %in% c("cox","randomforest","pow","portnoy","PengHuang")==0) 
+  if(model %in% c("cox","randomforest","pow","portnoy","PengHuang","distBoost")==0) 
     stop("The regression model is not supported.")
 
   ## Check the type of the confidence inteval
@@ -168,6 +169,14 @@ cfsurv <- function(x,c_list=NULL,
   weight_new <- 1/pr_new
 
   ## Run the main function and gather resutls
+  if(model == "distBoost"){
+    res = distBoost_based(x,c,alpha,
+                    data_fit,
+                    data_calib,
+                    weight_calib,
+                    weight_new)
+   }
+
   if(model == "cox"){
     res = cox_based(x,c,alpha,
                     data_fit,

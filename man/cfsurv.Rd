@@ -18,7 +18,9 @@ cfsurv(
   seed = 24601,
   model = "cox",
   dist = "weibull",
-  I_fit = NULL
+  I_fit = NULL,
+  ftol = 0.1,
+  tol = 0.1
 )
 }
 \arguments{

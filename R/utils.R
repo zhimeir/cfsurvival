@@ -3,29 +3,85 @@
 #' @export
 
 censoring_prob <- function(fit,calib,test=NULL,
+                           method="distBoost",
                            xnames,c,ftol=.1,tol=.1){
 
-  ## Fitting P(-C<=-c_0|X) (since P(C>=c_0|X)=P(-C<=-c_0|X))
-  fit$C <- -fit$C
-  fmla <- with(fit,as.formula(paste("C ~ ", paste(xnames, collapse= "+"))))
-  if(length(xnames)==1){
-    capture.output(bw <- npcdistbw(fmla),file ='NULL')
-  }else{
-    capture.output(bw <- npcdistbw(fmla,ftol=ftol,tol=tol),file ='NULL')
+  p <- length(xnames)
+  if(method == "np"){
+    ## Fitting P(-C<=-c_0|X) (since P(C>=c_0|X)=P(-C<=-c_0|X))
+    fit$C <- -fit$C
+    fmla <- with(fit,as.formula(paste("C ~ ", paste(xnames, collapse= "+"))))
+    if(length(xnames)==1){
+      capture.output(bw <- npcdistbw(fmla),file ='NULL')
+    }else{
+      capture.output(bw <- npcdistbw(fmla,ftol=ftol,tol=tol),file ='NULL')
+    }
+
+    ## Computing censoring scores for the calibration data
+    newdata_calib <- calib
+    newdata_calib$C <- -c
+    pr_calib<- npcdist(bws=bw,newdata = newdata_calib)$condist
+
+    ## Computing the censoring scores for the test data
+    if(!is.null(test)){
+      newdata <- cbind(test,C=-c)
+      newdata <- data.frame(newdata)
+      colnames(newdata) <- c(xnames,"C")
+      pr_new <- npcdist(bws=bw,newdata=newdata)$condist
+    }else{pr_new=NULL}
   }
 
-  ## Computing censoring scores for the calibration data
-  newdata_calib <- calib
-  newdata_calib$C <- -c
-  pr_calib<- npcdist(bws=bw,newdata = newdata_calib)$condist
+  if(method == "distBoost"){
+    ## Fitting P(-C<=-c_0|X) (since P(C>=c_0|X)=P(-C<=-c_0|X))
+    fit$C <- -fit$C
+    fmla <- with(fit,as.formula(paste("C ~ ", paste(xnames, collapse= "+"))))
+    gbm_mdl <- gbm(fmla,data=fit,distribution="gaussian")
+    median_fit<- predict(object=gbm_mdl,newdata = fit)
+    res_fit <- fit$C-median_fit
+    resamp_fit <- median_fit + res_fit[sample.int(dim(fit)[1])]
+    if(p==1){
+      xdf <- data.frame(X1=fit[,colnames(fit)%in%xnames],
+                    X2=rep(1,dim(fit)[1]))
+     }else{
+      xdf <- fit[,colnames(fit)%in%xnames]
+     }
+    mdlrb <- modtrast(xdf,fit$C,resamp_fit,min.node=200)
 
-  ## Computing the censoring scores for the test data
-  if(!is.null(test)){
-    newdata <- cbind(test,C=-c)
-    newdata <- data.frame(newdata)
-    colnames(newdata) <- c(xnames,"C")
-    pr_new <- npcdist(bws=bw,newdata=newdata)$condist
-  }else{pr_new=NULL}
+    ## Computing the censoring scores for the calibration data
+    pr_calib <- rep(NA,dim(calib)[1])
+    median_calib<- predict(object=gbm_mdl,newdata = calib)
+    if(p==1){
+      xdf <- data.frame(X1=calib[,colnames(calib)%in%xnames],
+                    X2=rep(1,dim(calib)[1]))
+     }else{
+      xdf <- calib[,colnames(calib)%in%xnames]
+     }
+    for(i in 1:length(pr_calib)){
+      pr_calib[i] <- distBoost_cdf(mdlrb,xdf[i,],median_calib[i],
+                               -c,res_fit)
+    }
+
+    ## Computing the censoring scores for the test data
+    if(!is.null(test)){
+      newdata <- data.frame(test)
+      colnames(newdata) <- xnames
+      median_test<- predict(object=gbm_mdl,newdata = newdata)
+      if(p==1){
+        xdf <- data.frame(X1=test,
+                    X2=rep(1,length(test)))
+        n_new <- length(test)
+      }else{
+        xdf <- test
+        n_new <- dim(test)[1]
+      }
+      pr_new <- rep(NA,n_new)
+      for(i in 1:n_new){
+        pr_new[i] <- distBoost_cdf(mdlrb,xdf[i,],median_test[i],
+                               -c,res_fit)
+      }
+    }else{pr_new=NULL}
+
+  }
   return(list(pr_calib=pr_calib,pr_new=pr_new))
 }
 
