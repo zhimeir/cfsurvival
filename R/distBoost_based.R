@@ -21,7 +21,7 @@ distBoost_based <- function(x,c,alpha,
                       data_fit,
                       data_calib,
                       weight_calib,
-                      weight_new){
+                      weight_new,n.tree=100){
   ## Check the dimensionality of the input
   if(is.null(dim(x)[1])){
     len_x <- length(x)
@@ -46,8 +46,10 @@ distBoost_based <- function(x,c,alpha,
   surv_data_fit <- data_fit
   surv_data_fit$censored_T <- -surv_data_fit$censored_T
   fmla <- with(surv_data_fit,as.formula(paste("censored_T ~ ", paste(xnames, collapse= "+"))))
-  gbm_mdl <- gbm(fmla,data=surv_data_fit,distribution="gaussian",n.trees=50)
-  median_fit<- predict(object=gbm_mdl,newdata = surv_data_fit)
+  gbm_mdl <- gbm(fmla,data=surv_data_fit,distribution="gaussian",
+                 n.trees=n.tree)
+  capture.output(median_fit<- predict(object=gbm_mdl,newdata = surv_data_fit),
+                 file="NULL")
   res_T <- surv_data_fit$censored_T-median_fit
   resamp_T <- median_fit + res_T[sample.int(dim(surv_data_fit)[1])]
   if(p==1){
@@ -57,12 +59,15 @@ distBoost_based <- function(x,c,alpha,
     xdf <- surv_data_fit[,colnames(surv_data_fit)%in%xnames]
   }
   mdlrb <- modtrast(xdf,surv_data_fit$censored_T,
-                    resamp_T,min.node=200)
+                    resamp_T,min.node=n.tree)
 
   ## obtain the score of the calibration data
   surv_data_calib <- data_calib
   surv_data_calib$censored_T <- -surv_data_calib$censored_T
-  median_calib <- predict(object=gbm_mdl,newdata = surv_data_calib,n.trees=50)
+  capture.output(median_calib <- predict(object=gbm_mdl,
+                                         newdata = surv_data_calib,
+                                         n.trees=n.tree),
+                 file=NULL)
   if(p==1){
     xdf <- data.frame(X1=surv_data_calib[,colnames(surv_data_calib)%in%xnames],
                       X2=rep(1,dim(data_calib)[1]))

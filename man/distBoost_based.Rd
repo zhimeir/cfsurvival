@@ -4,7 +4,16 @@
 \alias{distBoost_based}
 \title{Confidence interval based on distributional boosting}
 \usage{
-distBoost_based(x, c, alpha, data_fit, data_calib, weight_calib, weight_new)
+distBoost_based(
+  x,
+  c,
+  alpha,
+  data_fit,
+  data_calib,
+  weight_calib,
+  weight_new,
+  n.tree = 100
+)
 }
 \arguments{
 \item{x}{a vector of the covariate of the test data.}

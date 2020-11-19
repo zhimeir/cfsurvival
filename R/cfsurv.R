@@ -45,7 +45,8 @@ cfsurv <- function(x,c_list=NULL,
                    model = "cox",
                    dist= "weibull",
                    I_fit = NULL,
-                   ftol=.1,tol=.1
+                   ftol=.1,tol=.1,
+                   n.tree=100
                    ){
   ## Check if the required packages are installed
   ## Solution found from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
@@ -174,7 +175,8 @@ cfsurv <- function(x,c_list=NULL,
                     data_fit,
                     data_calib,
                     weight_calib,
-                    weight_new)
+                    weight_new,
+                    n.tree)
    }
 
   if(model == "cox"){
