@@ -45,11 +45,12 @@ distBoost_based <- function(x,c,alpha,
   ## Moving on, use surv_data_fit  
   surv_data_fit <- data_fit
   surv_data_fit$censored_T <- -surv_data_fit$censored_T
-  fmla <- with(surv_data_fit,as.formula(paste("censored_T ~ ", paste(xnames, collapse= "+"))))
+  fmla <- with(surv_data_fit,as.formula(paste("censored_T~ ",
+                                              paste(xnames, collapse= "+"))))
   gbm_mdl <- gbm(fmla,data=surv_data_fit,distribution="gaussian",
                  n.trees=n.tree)
   capture.output(median_fit<- predict(object=gbm_mdl,newdata = surv_data_fit),
-                 file="NULL")
+                 file=NULL)
   res_T <- surv_data_fit$censored_T-median_fit
   resamp_T <- median_fit + res_T[sample.int(dim(surv_data_fit)[1])]
   if(p==1){
@@ -58,8 +59,8 @@ distBoost_based <- function(x,c,alpha,
   }else{
     xdf <- surv_data_fit[,colnames(surv_data_fit)%in%xnames]
   }
-  mdlrb <- modtrast(xdf,surv_data_fit$censored_T,
-                    resamp_T,min.node=n.tree)
+  mdlrb <- modtrast(xdf, surv_data_fit$censored_T,
+                    resamp_T, type = 'dist')
 
   ## obtain the score of the calibration data
   surv_data_calib <- data_calib
