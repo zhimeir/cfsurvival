@@ -21,7 +21,7 @@ cfsurv(
   I_fit = NULL,
   ftol = 0.1,
   tol = 0.1,
-  ntree = 100
+  n.tree = 100
 )
 }
 \arguments{

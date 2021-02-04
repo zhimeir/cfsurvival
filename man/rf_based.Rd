@@ -33,6 +33,7 @@ Construct a conformal predictive confidence interval based on random forest
 Other model: 
 \code{\link{cox_based}()},
 \code{\link{distBoost_based}()},
+\code{\link{gpr_based}()},
 \code{\link{ph_based}()},
 \code{\link{portnoy_based}()},
 \code{\link{pow_based}()}

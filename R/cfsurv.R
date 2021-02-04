@@ -60,6 +60,7 @@ cfsurv <- function(x,c_list=NULL,
                         "fishmethods",
                         "foreach",
                         "doParallel",
+                        "GauPro",
                         "gbm",
                         "np")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
@@ -88,7 +89,8 @@ cfsurv <- function(x,c_list=NULL,
   
 
   ## Check the type of the model. Only "cox" and "randomforest" are supported
-  if(model %in% c("cox","randomforest","pow","portnoy","PengHuang","distBoost")==0) 
+  if(model %in% c("cox","randomforest","pow","portnoy","PengHuang",
+                  "distBoost","gpr")==0) 
     stop("The regression model is not supported.")
 
   ## Check the type of the confidence inteval
@@ -179,6 +181,13 @@ cfsurv <- function(x,c_list=NULL,
                     n.tree)
    }
 
+  if(model == "gpr"){
+    res = gpr_based(x,c,alpha,
+                    data_fit,
+                    data_calib,
+                    weight_calib,
+                    weight_new)
+   }
   if(model == "cox"){
     res = cox_based(x,c,alpha,
                     data_fit,
