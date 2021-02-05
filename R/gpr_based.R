@@ -45,8 +45,6 @@ gpr_based <- function(x,c,alpha,
   ## Moving on, use surv_data_fit  
   surv_data_fit <- data_fit
   surv_data_fit$censored_T <- -surv_data_fit$censored_T
-  fmla <- with(surv_data_fit,as.formula(paste("censored_T~ ",
-                                              paste(xnames, collapse= "+"))))
   gpr_mdl <- GauPro(surv_data_fit[,names(surv_data_fit) %in% xnames],
                     surv_data_fit$censored_T,
                     type = "Gauss")
@@ -74,7 +72,7 @@ gpr_based <- function(x,c,alpha,
   sd_new <- gpr_mdl$predict(x, se.fit = TRUE)$se
   
   for(i in 1:len_x){
-    lower_bnd[i] <- mean_new[i] + sd_new[i] * qnorm(calib_term[i])
+    lower_bnd[i] <- -(mean_new[i] + sd_new[i] * qnorm(calib_term[i]))
   }
  
   lower_bnd <- pmax(lower_bnd,0)
