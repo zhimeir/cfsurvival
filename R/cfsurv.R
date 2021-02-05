@@ -90,7 +90,7 @@ cfsurv <- function(x,c_list=NULL,
 
   ## Check the type of the model. Only "cox" and "randomforest" are supported
   if(model %in% c("cox","randomforest","pow","portnoy","PengHuang",
-                  "distBoost","gpr")==0) 
+                  "distBoost","gpr", "distrf")==0) 
     stop("The regression model is not supported.")
 
   ## Check the type of the confidence inteval
@@ -183,6 +183,14 @@ cfsurv <- function(x,c_list=NULL,
 
   if(model == "gpr"){
     res = gpr_based(x,c,alpha,
+                    data_fit,
+                    data_calib,
+                    weight_calib,
+                    weight_new)
+   }
+  
+  if(model == "distrf"){
+    res = distrf_based(x,c,alpha,
                     data_fit,
                     data_calib,
                     weight_calib,

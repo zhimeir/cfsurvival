@@ -1,4 +1,4 @@
-#' Confidence interval based on Gaussian process regression
+#' Confidence interval based on random forest (cdf)
 #'
 #' Construct conformal predictive interval based on distributional boosting
 #'
@@ -17,11 +17,11 @@
 #'
 #' @export
 
-gpr_based <- function(x,c,alpha,
+distrf_based <- function(x,c,alpha,
                       data_fit,
                       data_calib,
                       weight_calib,
-                      weight_new){
+                      weight_new,n.tree=100){
   ## Check the dimensionality of the input
   if(is.null(dim(x)[1])){
     len_x <- length(x)
@@ -30,7 +30,7 @@ gpr_based <- function(x,c,alpha,
     len_x <- dim(x)[1]
     p <- dim(x)[2]
   }
-  
+
   ## Keep only the data points with C>=c
   ## Transform min(T,C) to min(T,c) 
   weight_calib <- weight_calib[data_calib$C>=c]
@@ -45,20 +45,29 @@ gpr_based <- function(x,c,alpha,
   ## Moving on, use surv_data_fit  
   surv_data_fit <- data_fit
   surv_data_fit$censored_T <- -surv_data_fit$censored_T
-  gpr_mdl <- GauPro(surv_data_fit[,names(surv_data_fit) %in% xnames],
-                    surv_data_fit$censored_T,
-                    type = "Gauss")
-
+  fmla <- with(surv_data_fit,as.formula(paste("censored_T~ ",
+                                              paste(xnames, collapse= "+"))))
+  mdl <- quantreg(fmla,data=surv_data_fit, method = "forest")
   ## obtain the score of the calibration data
   surv_data_calib <- data_calib
   surv_data_calib$censored_T <- -surv_data_calib$censored_T
-  mean_calib <- gpr_mdl$predict(surv_data_calib[,
-                                names(surv_data_calib) %in% xnames])
-  sd_calib <- gpr_mdl$predict(surv_data_calib[,
-                              names(surv_data_calib) %in% xnames],
-                              se.fit = TRUE)$se
+  capture.output(median_calib <- predict(object=gbm_mdl,
+                                         newdata = surv_data_calib,
+                                         n.trees=n.tree),
+                 file=NULL)
+  if(p==1){
+    xdf <- data.frame(X1=surv_data_calib[,colnames(surv_data_calib)%in%xnames],
+                      X2=rep(1,dim(data_calib)[1]))
+  }else{
+    xdf <- surv_data_calib[,colnames(surv_data_calib)%in%xnames]
+  }
 
-  score <- pnorm((surv_data_calib$censored_T - mean_calib) / sd_calib)
+  score <- rep(NA,dim(data_calib)[1])
+  for(i in 1:length(score)){
+    score[i] <- distBoost_cdf(mdlrb,xdf[i,],median_calib[i],
+                               surv_data_calib$censored_T[i],
+                               res_T)
+  }
  
   ## Obtain the calibration term
   calib_term <- sapply(X=weight_new,get_calibration,score=score,
@@ -68,13 +77,12 @@ gpr_based <- function(x,c,alpha,
   lower_bnd <- rep(0,len_x)
   newdata <- data.frame(x)
   colnames(newdata) <- xnames
-  mean_new <- gpr_mdl$predict(x)
-  sd_new <- gpr_mdl$predict(x, se.fit = TRUE)$se
-  print(c)
-  print(mean_new[1:10])
-  print(sd_new[1:10])
+  if(p==1){newdata$X2 <- rep(1,len_x)}
+  median_test <- predict(object=gbm_mdl,newdata = newdata)
   for(i in 1:len_x){
-    lower_bnd[i] <- -(mean_new[i] + sd_new[i] * qnorm(calib_term[i]))
+    qres_fit <- as.numeric(quantile(res_T,calib_term[i]))
+    bound <- ydist(mdlrb,newdata[i,],median_test[i]+qres_fit)
+    lower_bnd[i] <- -bound
   }
  
   lower_bnd <- pmax(lower_bnd,0)
@@ -84,3 +92,15 @@ gpr_based <- function(x,c,alpha,
 
 
 
+distBoost_cdf <- function(mdl,x,z,t,resid){
+ perc <- (0:1000)/1000
+ qres <- as.numeric(quantile(resid,perc))
+ yhat <- ydist(mdl,x,z+qres)
+ quant_ind <- suppressWarnings(min(which(yhat>=t)))
+ if(quant_ind==Inf){
+  perc_est <- 1
+ }else{
+  perc_est <- perc[quant_ind]
+ }
+ return(perc_est)
+}
