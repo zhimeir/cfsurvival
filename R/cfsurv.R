@@ -66,7 +66,6 @@ cfsurv <- function(x,c_list=NULL,
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
   if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
   suppressPackageStartupMessages(res <- lapply(X=list.of.packages,FUN=require,character.only=TRUE))
-
   ## Process the input
   ## Check the length of x and c: only two cases are supported. length(r)=1, or length(r)=length(x)
   X <- Xtrain
@@ -170,7 +169,7 @@ cfsurv <- function(x,c_list=NULL,
   ## Computing the weight for the calibration data and the test data
   weight_calib <- 1/pr_calib
   weight_new <- 1/pr_new
-
+ 
   ## Run the main function and gather resutls
   if(model == "distBoost"){
     res = distBoost_based(x,c,alpha,

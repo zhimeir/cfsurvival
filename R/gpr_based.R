@@ -66,13 +66,8 @@ gpr_based <- function(x,c,alpha,
 
   ## Obtain the final confidence interval
   lower_bnd <- rep(0,len_x)
-  newdata <- data.frame(x)
-  colnames(newdata) <- xnames
   mean_new <- gpr_mdl$predict(x)
   sd_new <- gpr_mdl$predict(x, se.fit = TRUE)$se
-  print(c)
-  print(mean_new[1:10])
-  print(sd_new[1:10])
   for(i in 1:len_x){
     lower_bnd[i] <- -(mean_new[i] + sd_new[i] * qnorm(calib_term[i]))
   }
