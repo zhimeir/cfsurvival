@@ -46,6 +46,12 @@ censoring_prob <- function(fit,calib,test=NULL,
       xdf <- fit[,colnames(fit)%in%xnames]
      }
     mdlrb <- modtrast(xdf,fit$C,resamp_fit,min.node=200)
+    
+    ## Computing the censoring scores for the fitting data
+    pr_fit <- rep(NA,dim(fit)[1])
+    for(i in 1:length(pr_fit)){
+      pr_fit[i] <- distBoost_cdf(mdlrb,xdf[i,],median_fit[i],-c,res_fit)
+    }
 
     ## Computing the censoring scores for the calibration data
     pr_calib <- rep(NA,dim(calib)[1])
@@ -76,13 +82,47 @@ censoring_prob <- function(fit,calib,test=NULL,
       }
       pr_new <- rep(NA,n_new)
       for(i in 1:n_new){
-        pr_new[i] <- distBoost_cdf(mdlrb,xdf[i,],median_test[i],
-                               -c,res_fit)
+        pr_new[i] <- distBoost_cdf(mdlrb,xdf[i,],median_test[i],-c,res_fit)
       }
+    }else{pr_new=NULL}
+  }
+
+
+  if(method == "gpr"){
+    ## Fitting P(-C<=-c_0|X) (since P(C>=c_0|X)=P(-C<=-c_0|X))
+    fit$C <- -fit$C
+    gpr_mdl <- GauPro(X = as.matrix(fit[,names(fit) %in% xnames]),
+                    Z = fit$C, D = p,
+                    type = "Gauss")
+    
+    ## Computing the censoring scores for the fitting data
+    mean_fit <- gpr_mdl$predict(fit[,names(fit) %in% xnames])
+    sd_fit <- gpr_mdl$predict(fit[,names(fit) %in% xnames],
+                              se.fit = TRUE)$se
+
+    pr_fit <- pnorm((-c - mean_fit) / sd_fit)
+
+    ## Computing the censoring scores for the calibration data
+    mean_calib <- gpr_mdl$predict(calib[,names(calib) %in% xnames])
+    sd_calib <- gpr_mdl$predict(calib[,names(calib) %in% xnames],
+                              se.fit = TRUE)$se
+
+    pr_calib <- pnorm((-c - mean_calib) / sd_calib)
+
+    ## Computing the censoring scores for the test data
+    if(!is.null(test)){
+      newdata <- data.frame(test)
+      colnames(newdata) <- xnames
+      mean_new <- gpr_mdl$predict(newdata[,names(newdata) %in% xnames])
+      sd_new <- gpr_mdl$predict(newdata[,names(newdata) %in% xnames],
+                              se.fit = TRUE)$se
+
+      pr_new <- pnorm((-c - mean_new) / sd_new)
+
     }else{pr_new=NULL}
 
   }
-  return(list(pr_calib=pr_calib,pr_new=pr_new))
+  return(list(pr_fit = pr_fit, pr_calib = pr_calib, pr_new = pr_new))
 }
 
 

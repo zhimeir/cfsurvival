@@ -45,8 +45,8 @@ gpr_based <- function(x,c,alpha,
   ## Moving on, use surv_data_fit  
   surv_data_fit <- data_fit
   surv_data_fit$censored_T <- -surv_data_fit$censored_T
-  gpr_mdl <- GauPro(surv_data_fit[,names(surv_data_fit) %in% xnames],
-                    surv_data_fit$censored_T,
+  gpr_mdl <- GauPro(X = as.matrix(surv_data_fit[,names(surv_data_fit) %in% xnames]),
+                    Z = surv_data_fit$censored_T, D = p,
                     type = "Gauss")
 
   ## obtain the score of the calibration data
