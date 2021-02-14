@@ -86,6 +86,7 @@ distBoost_based <- function(x,c,alpha,
   ## Obtain the calibration term
   calib_term <- sapply(X=weight_new,get_calibration,score=score,
                          weight_calib=weight_calib,alpha=alpha)
+  calib_term <- pmin(calib_term, 1)
 
   ## Obtain the final confidence interval
   lower_bnd <- rep(0,len_x)
