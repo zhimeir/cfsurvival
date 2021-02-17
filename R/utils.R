@@ -4,7 +4,7 @@
 
 censoring_prob <- function(fit,calib,test=NULL,
                            method="distBoost",
-                           xnames,c,ftol=.1,tol=.1){
+                           xnames,c,ftol=.1,tol=.1,n.tree = 40){
 
   p <- length(xnames)
   if(method == "np"){
@@ -35,7 +35,7 @@ censoring_prob <- function(fit,calib,test=NULL,
     ## Fitting P(-C<=-c_0|X) (since P(C>=c_0|X)=P(-C<=-c_0|X))
     fit$C <- -fit$C
     fmla <- with(fit,as.formula(paste("C ~ ", paste(xnames, collapse= "+"))))
-    gbm_mdl <- gbm(fmla,data=fit,distribution="gaussian")
+    gbm_mdl <- gbm(fmla,data=fit,distribution="gaussian", n.tree = n.tree)
     median_fit<- predict(object=gbm_mdl,newdata = fit)
     res_fit <- fit$C-median_fit
     resamp_fit <- median_fit + res_fit[sample.int(dim(fit)[1])]
