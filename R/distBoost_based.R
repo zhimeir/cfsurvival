@@ -82,11 +82,11 @@ distBoost_based <- function(x,c,alpha,
                                surv_data_calib$censored_T[i],
                                res_T)
   }
- 
+  ##   browser() 
   ## Obtain the calibration term
   calib_term <- sapply(X=weight_new,get_calibration,score=score,
                          weight_calib=weight_calib,alpha=alpha)
-  calib_term <- pmin(calib_term, 1)
+  ##   calib_term <- pmin(calib_term, 1)
 
   ## Obtain the final confidence interval
   lower_bnd <- rep(0,len_x)
@@ -95,9 +95,13 @@ distBoost_based <- function(x,c,alpha,
   if(p==1){newdata$X2 <- rep(1,len_x)}
   median_test <- predict(object=gbm_mdl,newdata = newdata)
   for(i in 1:len_x){
-    qres_fit <- as.numeric(quantile(res_T,calib_term[i]))
-    bound <- ydist(mdlrb,newdata[i,],median_test[i]+qres_fit)
-    lower_bnd[i] <- -bound
+    if(calib_term[i] == Inf){
+      lower_bnd[i] <- 0
+    }else{
+      qres_fit <- as.numeric(quantile(res_T,calib_term[i]))
+      bound <- ydist(mdlrb,newdata[i,],median_test[i]+qres_fit)
+      lower_bnd[i] <- -bound
+    }
   }
  
   lower_bnd <- pmax(lower_bnd,0)
@@ -107,12 +111,12 @@ distBoost_based <- function(x,c,alpha,
 
 
 
-distBoost_cdf <- function(mdl,x,z,t,resid){
- perc <- (0:1000)/1000
- qres <- as.numeric(quantile(resid,perc))
- yhat <- ydist(mdl,x,z+qres)
- quant_ind <- suppressWarnings(min(which(yhat>=t)))
- if(quant_ind==Inf){
+distBoost_cdf <- function(mdl, x, z, t, resid){
+ perc <- (0 : 1000) / 1000
+ qres <- as.numeric(quantile(resid, perc))
+ yhat <- ydist(mdl, x, z + qres)
+ quant_ind <- suppressWarnings(min(which(yhat >= t)))
+ if(quant_ind == Inf){
   perc_est <- 1
  }else{
   perc_est <- perc[quant_ind]

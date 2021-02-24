@@ -2,9 +2,10 @@
 #'
 #' @export
 
-censoring_prob <- function(fit,calib,test=NULL,
-                           method="distBoost",
-                           xnames,c,ftol=.1,tol=.1,n.tree = 40){
+censoring_prob <- function(fit, calib, test=NULL,
+                           method = "distBoost",
+                           xnames, c,
+                           ftol=.1, tol=.1, n.tree = 40){
 
   p <- length(xnames)
   if(method == "np"){
@@ -12,9 +13,9 @@ censoring_prob <- function(fit,calib,test=NULL,
     fit$C <- -fit$C
     fmla <- with(fit,as.formula(paste("C ~ ", paste(xnames, collapse= "+"))))
     if(length(xnames)==1){
-      capture.output(bw <- npcdistbw(fmla),file ='NULL')
+      capture.output(bw <- npcdistbw(fmla),file =NULL)
     }else{
-      capture.output(bw <- npcdistbw(fmla,ftol=ftol,tol=tol),file ='NULL')
+      capture.output(bw <- npcdistbw(fmla,ftol=ftol,tol=tol),file =NULL)
     }
 
     ## Computing censoring scores for the calibration data
@@ -48,13 +49,13 @@ censoring_prob <- function(fit,calib,test=NULL,
     mdlrb <- modtrast(xdf,fit$C,resamp_fit,min.node=200)
     
     ## Computing the censoring scores for the fitting data
-    pr_fit <- rep(NA,dim(fit)[1])
+    pr_fit <- rep(NA, dim(fit)[1])
     for(i in 1:length(pr_fit)){
-      pr_fit[i] <- distBoost_cdf(mdlrb,xdf[i,],median_fit[i],-c,res_fit)
+        pr_fit[i] <- distBoost_cdf(mdlrb,xdf[i,],median_fit[i],-c,res_fit)
     }
 
     ## Computing the censoring scores for the calibration data
-    pr_calib <- rep(NA,dim(calib)[1])
+    pr_calib <- rep(NA, dim(calib)[1])
     median_calib<- predict(object=gbm_mdl,newdata = calib)
     if(p==1){
       xdf <- data.frame(X1=calib[,colnames(calib)%in%xnames],
@@ -62,6 +63,7 @@ censoring_prob <- function(fit,calib,test=NULL,
      }else{
       xdf <- calib[,colnames(calib)%in%xnames]
      }
+
     for(i in 1:length(pr_calib)){
       pr_calib[i] <- distBoost_cdf(mdlrb,xdf[i,],median_calib[i],
                                -c,res_fit)
@@ -80,9 +82,9 @@ censoring_prob <- function(fit,calib,test=NULL,
         xdf <- test
         n_new <- dim(test)[1]
       }
-      pr_new <- rep(NA,n_new)
+      pr_new <- rep(NA, n_new)
       for(i in 1:n_new){
-        pr_new[i] <- distBoost_cdf(mdlrb,xdf[i,],median_test[i],-c,res_fit)
+          pr_new[i] <- distBoost_cdf(mdlrb,xdf[i,],median_test[i],-c,res_fit)
       }
     }else{pr_new=NULL}
   }
