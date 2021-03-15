@@ -34,6 +34,7 @@ Other model:
 \code{\link{gpr_based}()},
 \code{\link{portnoy_based}()},
 \code{\link{pow_based}()},
+\code{\link{quantBoost_based}()},
 \code{\link{rf_based}()}
 }
 \concept{model}

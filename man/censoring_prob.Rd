@@ -12,7 +12,8 @@ censoring_prob(
   xnames,
   c,
   ftol = 0.1,
-  tol = 0.1
+  tol = 0.1,
+  n.tree = 40
 )
 }
 \description{
