@@ -1,4 +1,4 @@
-# cfSurvival
+# cfsurvival
 An R package for conformalized survival analysisi.
 
 ## Installation

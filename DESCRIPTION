@@ -1,4 +1,4 @@
-Package: cfSurvival
+Package: cfsurvival
 Type: Package
 Title: A package to construct predictive confidence interval for survival data
 Version: 0.1.0
