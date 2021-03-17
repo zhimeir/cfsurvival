@@ -21,11 +21,17 @@ cfsurv(
   I_fit = NULL,
   ftol = 0.1,
   tol = 0.1,
-  n.tree = 100
+  n.tree = 500
 )
 }
 \arguments{
 \item{x}{a vector of the covariate for test point.}
+
+\item{c_list}{the cutoff for the censoring time (a positive number or a vector).}
+
+\item{pr_list}{the censoring probability at the cutoff for the fitting and calibration datasets.}
+
+\item{pr_new_list}{the censoring probability at the cutoff for the test points.}
 
 \item{Xtrain}{a n-by-p matrix of the covariate of the training data.}
 
@@ -39,18 +45,11 @@ cfsurv(
 
 \item{seed}{an integer random seed (default: 24601).}
 
-\item{model}{Options include "cox", "randomforest", "Powell", "Portnoy" and "PengHuang". This determines the model used to fit the condditional quantile (default: "cox").}
+\item{model}{Options include "cox", "aft", "randomforest", "Powell", "Portnoy", "PengHuang", "distBoost", "quantBoost", "gpr". This determines the model used to fit the conformal score (default: "cox").}
 
-\item{dist}{either "weibull", "exponential" or "gaussian" (default: "weibull"). The distribution of T used in the cox model.}
+\item{dist}{either "weibull", "exponential" or "gaussian" (default: "weibull"). The distribution of T used in the AFT model.}
 
-\item{c}{the censoring time for the test point.}
-
-\item{h}{the bandwidth for the local confidence interval. Default is 1.}
-}
-\value{
-low_ci a value of the lower bound for the survival time of the test point.
-
-includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
+\item{I_fit}{The set of indices corresponding to the fitting data set. (Default: NULL)}
 }
 \description{
 The main function to generate a predictive conformal confidence interval for a unit's survival time.
@@ -60,13 +59,15 @@ The main function to generate a predictive conformal confidence interval for a u
 n <- 500
 X <- runif(n,0,2)
 T <- exp(X+rnorm(n,0,1))
-R <- rexp(n,rate = 0.01)
-event <- T<=R
-time <- pmin(T,R)
-data <- data.frame(X=X,R=R,event=event,censored_T=censored_T)
+C <- rexp(n,rate = 0.01)
+event <- (T <= C)
+time <- pmin(T,C)
+data <- data.frame(X = X, C = C, event = event, censored_T = censored_T)
+
 # Prediction point
 x <- seq(0,2,by=.4)
 r <- 2
+
 # Run cfsurv
 res <- cfsurv(x,r,X,R,event,time,alpha=0.1,model="cox")
 

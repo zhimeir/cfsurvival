@@ -3,34 +3,35 @@
 #' The main function to generate a predictive conformal confidence interval for a unit's survival time.
 #'
 #' @param x a vector of the covariate for test point. 
-#' @param c the censoring time for the test point.
+#' @param c_list the cutoff for the censoring time (a positive number or a vector).
+#' @param pr_list the censoring probability at the cutoff for the fitting and calibration datasets.
+#' @param pr_new_list the censoring probability at the cutoff for the test points.
 #' @param Xtrain a n-by-p matrix of the covariate of the training data.
 #' @param C a length n vector of the censoring time of the training data.
 #' @param event a length n vector of indicators if the time observed is censored. TRUE corresponds to NOT censored, and FALSE censored.
 #' @param time  a vevtor of length n, containing the observed survival time.
 #' @param alpha a number between 0 and 1, speciifying the miscoverage rate.
 #' @param seed an integer random seed (default: 24601).
-#' @param model Options include "cox", "randomforest", "Powell", "Portnoy" and "PengHuang". This determines the model used to fit the condditional quantile (default: "cox").
-#' @param dist either "weibull", "exponential" or "gaussian" (default: "weibull"). The distribution of T used in the cox model. 
-#' @param h the bandwidth for the local confidence interval. Default is 1.
-#'
-#' @return low_ci a value of the lower bound for the survival time of the test point.
-#' @return includeR 0 or 1, indicating if [r,inf) is included in the confidence interval.
+#' @param model Options include "cox", "aft", "randomforest", "Powell", "Portnoy", "PengHuang", "distBoost", "quantBoost", "gpr". This determines the model used to fit the conformal score (default: "cox").
+#' @param dist either "weibull", "exponential" or "gaussian" (default: "weibull"). The distribution of T used in the AFT model. 
+#' @param I_fit The set of indices corresponding to the fitting data set. (Default: NULL)
 #'
 #' @examples
 #' # Generate data
 #' n <- 500
 #' X <- runif(n,0,2)
 #' T <- exp(X+rnorm(n,0,1))
-#' R <- rexp(n,rate = 0.01)
-#' event <- T<=R
-#' time <- pmin(T,R)
-#' data <- data.frame(X=X,R=R,event=event,censored_T=censored_T)
+#' C <- rexp(n,rate = 0.01)
+#' event <- (T <= C)
+#' time <- pmin(T,C)
+#' data <- data.frame(X = X, C = C, event = event, censored_T = censored_T)
+#'
 #' # Prediction point
-#' x <- seq(0,2,by=.4)
-#' r <- 2
-#' # Run cfsurv
-#' res <- cfsurv(x,r,X,R,event,time,alpha=0.1,model="cox")
+#' n_test <- 10
+#' X <- runif(n_test, 0, 2)
+#'
+#' # Run cfsurv with c_0 = 
+#' res <- cfsurv(x, c, X, C, event, time, alpha=0.1, model="cox")
 #'
 #' @export
 
@@ -46,7 +47,7 @@ cfsurv <- function(x,c_list=NULL,
                    dist= "weibull",
                    I_fit = NULL,
                    ftol=.1,tol=.1,
-                   n.tree=100
+                   n.tree=500
                    ){
   ## Check if the required packages are installed
   ## Solution found from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
