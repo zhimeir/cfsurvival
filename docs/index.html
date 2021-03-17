@@ -47,7 +47,14 @@
   <a href="reference/index.html">Reference</a>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/zhimeir/cfsurvival/">
+    <span class="fab fa fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -100,22 +107,34 @@ devtools::install_github("zhimeir/cfsurvival")</code></pre>
 <div id="usage-example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#usage-example" class="anchor"></a>Usage example</h2>
-<pre class="{r}"><code>
+<pre class="{r}"><code><a href="https://rdrr.io/r/base/Random.html">
 # Generate data
-n &lt;- 500
-X &lt;- runif(n,0,2)
-T &lt;- exp(X+rnorm(n,0,1))
-C &lt;- rexp(n,rate = 0.01)
+set.seed(24601)
+n &lt;- 2000
+X &lt;- runif(n, 0, 2)
+T &lt;- exp(X + rnorm(n,0,1))
+C &lt;- rexp(n, rate = 0.05)
 event &lt;- (T &lt;= C)
-time &lt;- pmin(T,C)
+censored_T &lt;- pmin(T, C)
 data &lt;- data.frame(X = X, C = C, event = event, censored_T = censored_T)
 
 # Prediction point
-n_test &lt;- 10
-X &lt;- runif(n_test, 0, 2)
+n_test &lt;- 1000
+X_test &lt;- runif(n_test, 0, 2)
+T_test &lt;- exp(X_test + rnorm(n,0,1))
 
-# Run cfsurv with c_0 = 
-res &lt;- cfsurv(x, c, X, C, event, time, alpha=0.1, model="cox")</code></pre>
+# Running cfsurvival under completely independent censoring with c0 = 20 
+c0 &lt;- 20
+pr_list &lt;- rep(0.5, n)
+pr_new_list &lt;- rep(0.5, n_test)
+
+# Use the Cox model
+res &lt;- cfsurv(x = X_test, c_list = c0, pr_list = pr_list, pr_new_list = pr_new_list,
+             Xtrain = X, C = C, event = event, time = censored_T, 
+             alpha = 0.1, model = "cox")
+
+# Examine the result
+cat(sprintf("The coverage is %.3f.\n", mean(res &lt;= T_test)))</a></code></pre>
 </div>
 <div id="license" class="section level2">
 <h2 class="hasAnchor">
@@ -126,7 +145,16 @@ res &lt;- cfsurv(x, c, X, C, event, time, alpha=0.1, model="cox")</code></pre>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <div class="license">
+    <div class="links">
+<h2>Links</h2>
+<ul class="list-unstyled">
+<li>Browse source code at <br><a href="https://github.com/zhimeir/cfsurvival/">https://​github.com/​zhimeir/​cfsurvival/​</a>
+</li>
+<li>Report a bug at <br><a href="https://github.com/zhimeir/cfsurvival/issues">https://​github.com/​zhimeir/​cfsurvival/​issues</a>
+</li>
+</ul>
+</div>
+<div class="license">
 <h2>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>

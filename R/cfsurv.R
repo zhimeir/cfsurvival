@@ -18,20 +18,30 @@
 #'
 #' @examples
 #' # Generate data
-#' n <- 500
-#' X <- runif(n,0,2)
-#' T <- exp(X+rnorm(n,0,1))
-#' C <- rexp(n,rate = 0.01)
+#' set.seed(24601)
+#' n <- 2000
+#' X <- runif(n, 0, 2)
+#' T <- exp(X + rnorm(n, 0, 1))
+#' C <- rexp(n, rate = 0.05)
 #' event <- (T <= C)
-#' time <- pmin(T,C)
+#' censored_T <- pmin(T, C)
 #' data <- data.frame(X = X, C = C, event = event, censored_T = censored_T)
 #'
 #' # Prediction point
-#' n_test <- 10
-#' X <- runif(n_test, 0, 2)
+#' n_test <- 1000
+#' X_test <- runif(n_test, 0, 2)
+#' T_test <- exp(X_test + rnorm(n,0,1))
 #'
-#' # Run cfsurv with c_0 = 
-#' res <- cfsurv(x, c, X, C, event, time, alpha=0.1, model="cox")
+#' # Running cfsurvival with c0 = 20
+#' c0 <- 20
+#' pr_list <- rep(0.5, n)
+#' pr_new_list <- rep(0.5, n_test)
+#' res <- cfsurv(x = X_test, c_list = c0, pr_list = pr_list, pr_new_list = pr_new_list,
+#'              Xtrain = X, C = C, event = event, time = censored_T, 
+#'              alpha = 0.1, model = "cox")
+#'
+#' # Examine the result
+#'cat(sprintf("The coverage is %.3f.\n", mean(res <= T_test)))
 #'
 #' @export
 
@@ -133,7 +143,9 @@ cfsurv <- function(x,c_list=NULL,
   if(length(c_list)==1){
     c <- c_list
     if(is.null(pr_list) | is.null(pr_new_list)){
-      res <- censoring_prob(data_fit,data_calib,newdata,xnames,c,ftol,tol)
+      res <- censoring_prob(fit = data_fit, calib = data_calib,
+                            test = newdata, xnames = xnames,
+                            c = c, method = "distBoost",n.tree = 500)
       pr_calib <- res$pr_calib
       pr_new <- res$pr_new
     }else{
