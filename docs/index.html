@@ -62,12 +62,65 @@
 <div id="cfsurvival" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#cfsurvival" class="anchor"></a>cfsurvival</h1></div>
-<p>An R package for conformalized survival analysisi.</p>
+<p>An R package that implements the conformalized survival analysis methodology.</p>
+<div id="overview" class="section level2">
+<h2 class="hasAnchor">
+<a href="#overview" class="anchor"></a>Overview</h2>
+<p>The goal of <strong><em>cfsurvival</em></strong> is to provide a lower predictive lower bound for the survival time of an individual, with the guarantee that with probability (1-<span class="math inline"><em>α</em></span>) it is no larger than the true survival time.</p>
+</div>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
 <p>To install this package, run the following command in your R console:</p>
-<pre class="{r}"><code><a href="https://devtools.r-lib.org//reference/remote-reexports.html">devtools::install_github("zhimeir/cfsurvival")</a></code></pre>
+<pre class="{r}"><code>if (!require("devtools")){
+    install.packages("devtools")
+}
+devtools::install_github("zhimeir/cfsurvival")</code></pre>
+</div>
+<div id="dependencies" class="section level2">
+<h2 class="hasAnchor">
+<a href="#dependencies" class="anchor"></a>Dependencies</h2>
+<p>The following <a href="https://www.r-project.org/">R</a> packages (version 4.0.2) packages are required:</p>
+<ul>
+<li><a href="https://cran.r-project.org/web/packages/quantreg/index.html">quantreg</a></li>
+<li><a href="https://github.com/grf-labs/grf">grf</a></li>
+<li><a href="https://cran.r-project.org/web/packages/quantregForest/index.html">quantregForest</a></li>
+<li><a href="https://cran.r-project.org/web/packages/randomForestSRC/index.html">randomForestSRC</a></li>
+<li><a href="https://cran.r-project.org/web/packages/survival/index.html">survival</a></li>
+<li><a href="https://www.tidyverse.org/">tidyverse</a></li>
+<li><a href="https://cran.r-project.org/web/packages/fishmethods/index.html">fishmethods</a></li>
+<li><a href="https://cran.r-project.org/web/packages/foreach/index.html">foreach</a></li>
+<li><a href="https://cran.r-project.org/web/packages/doParallel/index.html">doParallel</a></li>
+<li><a href="https://cran.r-project.org/web/packages/GauPro/index.html">GauPro</a></li>
+<li><a href="https://cran.r-project.org/web/packages/gbm/index.html">gbm</a></li>
+<li><a href="https://cran.r-project.org/web/packages/np/index.html">np</a></li>
+<li><a href="http://statweb.stanford.edu/~jhf/conTree/">conTree</a></li>
+</ul>
+</div>
+<div id="usage-example" class="section level2">
+<h2 class="hasAnchor">
+<a href="#usage-example" class="anchor"></a>Usage example</h2>
+<pre class="{r}"><code>
+# Generate data
+n &lt;- 500
+X &lt;- runif(n,0,2)
+T &lt;- exp(X+rnorm(n,0,1))
+C &lt;- rexp(n,rate = 0.01)
+event &lt;- (T &lt;= C)
+time &lt;- pmin(T,C)
+data &lt;- data.frame(X = X, C = C, event = event, censored_T = censored_T)
+
+# Prediction point
+n_test &lt;- 10
+X &lt;- runif(n_test, 0, 2)
+
+# Run cfsurv with c_0 = 
+res &lt;- cfsurv(x, c, X, C, event, time, alpha=0.1, model="cox")</code></pre>
+</div>
+<div id="license" class="section level2">
+<h2 class="hasAnchor">
+<a href="#license" class="anchor"></a>License</h2>
+<p>This packakge is is distributed under the MIT license.</p>
 </div>
 </div>
   </div>
@@ -76,7 +129,8 @@
     <div class="license">
 <h2>License</h2>
 <ul class="list-unstyled">
-<li>What license is it under?</li>
+<li><a href="LICENSE.html">Full license</a></li>
+<li><small><a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a></small></li>
 </ul>
 </div>
 <div class="developers">

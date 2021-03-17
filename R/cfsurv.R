@@ -51,8 +51,7 @@ cfsurv <- function(x,c_list=NULL,
                    ){
   ## Check if the required packages are installed
   ## Solution found from https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
-  list.of.packages <- c("ggplot2",
-                        "quantreg",
+  list.of.packages <- c("quantreg",
                         "grf",
                         "quantregForest",
                         "randomForestSRC",
@@ -63,7 +62,8 @@ cfsurv <- function(x,c_list=NULL,
                         "doParallel",
                         "GauPro",
                         "gbm",
-                        "np")
+                        "np", 
+                        "conTree")
   new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
   if(length(new.packages)) install.packages(new.packages, repos='http://cran.us.r-project.org')
   suppressPackageStartupMessages(res <- lapply(X=list.of.packages,FUN=require,character.only=TRUE))
