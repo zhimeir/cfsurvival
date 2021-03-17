@@ -65,10 +65,10 @@ time <- pmin(T,C)
 data <- data.frame(X = X, C = C, event = event, censored_T = censored_T)
 
 # Prediction point
-x <- seq(0,2,by=.4)
-r <- 2
+n_test <- 10
+X <- runif(n_test, 0, 2)
 
-# Run cfsurv
-res <- cfsurv(x,r,X,R,event,time,alpha=0.1,model="cox")
+# Run cfsurv with c_0 = 
+res <- cfsurv(x, c, X, C, event, time, alpha=0.1, model="cox")
 
 }
