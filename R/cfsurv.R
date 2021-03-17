@@ -12,7 +12,7 @@
 #' @param time  a vevtor of length n, containing the observed survival time.
 #' @param alpha a number between 0 and 1, speciifying the miscoverage rate.
 #' @param seed an integer random seed (default: 24601).
-#' @param model Options include "cox", "aft", "randomforest", "Powell", "Portnoy", "PengHuang", "distBoost", "quantBoost", "gpr". This determines the model used to fit the conformal score (default: "cox").
+#' @param model Options include "aft", "np", "randomforest", "Powell", "Portnoy", "PengHuang", "distBoost", "quantBoost", "gpr". This determines the model used to fit the conformal score (default: "cox").
 #' @param dist either "weibull", "exponential" or "gaussian" (default: "weibull"). The distribution of T used in the AFT model. 
 #' @param I_fit The set of indices corresponding to the fitting data set. (Default: NULL)
 #'
@@ -32,16 +32,16 @@
 #' X_test <- runif(n_test, 0, 2)
 #' T_test <- exp(X_test + rnorm(n,0,1))
 #'
-#' # Running cfsurvival with c0 = 20
-#' c0 <- 20
+#' # Running cfsurvival with c0 = 30
+#' c0 <- 30
 #' pr_list <- rep(0.5, n)
 #' pr_new_list <- rep(0.5, n_test)
 #' res <- cfsurv(x = X_test, c_list = c0, pr_list = pr_list, pr_new_list = pr_new_list,
 #'              Xtrain = X, C = C, event = event, time = censored_T, 
-#'              alpha = 0.1, model = "cox")
+#'              alpha = 0.1, model = "aft")
 #'
 #' # Examine the result
-#'cat(sprintf("The coverage is %.3f.\n", mean(res <= T_test)))
+#' cat(sprintf("The coverage is %.3f.\n", mean(res <= T_test)))
 #'
 #' @export
 
@@ -51,9 +51,8 @@ cfsurv <- function(x,c_list=NULL,
                    pr_new_list=NULL,
                    Xtrain,C,event,time,
                    alpha=0.05,
-                   type="quantile",
                    seed = 24601,
-                   model = "cox",
+                   model = "aft",
                    dist= "weibull",
                    I_fit = NULL,
                    ftol=.1,tol=.1,
@@ -99,12 +98,10 @@ cfsurv <- function(x,c_list=NULL,
   
 
   ## Check the type of the model. Only "cox" and "randomforest" are supported
-  if(model %in% c("cox","randomforest","pow","portnoy","PengHuang",
+  if(model %in% c("aft","randomforest","pow","portnoy","PengHuang",
                   "distBoost","gpr", "quantBoost")==0) 
     stop("The regression model is not supported.")
 
-  ## Check the type of the confidence inteval
-  if(type %in% c("quantile","percentile")==0) stop("The type of confidence interval is not supported.")
 
   ## Check the value of alpha
   if (alpha>=1 | alpha<=0) stop("The value of alpha is out of bound.")
@@ -210,18 +207,24 @@ cfsurv <- function(x,c_list=NULL,
                     weight_new)
    }
   
-  if(model == "cox"){
-    res = cox_based(x,c,alpha,
+  if(model == "aft"){
+    res = aft_based(x,c,alpha,
                     data_fit,
                     data_calib,
-                    type,
                     dist,
+                    weight_calib,
+                    weight_new)
+   }
+  
+  if(model == "np"){
+    res = np_based(x,c,alpha,
+                    data_fit,
+                    data_calib,
                     weight_calib,
                     weight_new,
                     ftol,
                     tol)
    }
-  
   if(model == "randomforest"){
     res = rf_based(x,c,alpha,
                    data_fit,

@@ -107,7 +107,9 @@ devtools::install_github("zhimeir/cfsurvival")</code></pre>
 <div id="usage-example" class="section level2">
 <h2 class="hasAnchor">
 <a href="#usage-example" class="anchor"></a>Usage example</h2>
-<pre class="{r}"><code><a href="https://rdrr.io/r/base/Random.html">
+<pre class="{r}"><code><a href="https://github.com/zhimeir/cfsurvival"># Library the package
+library(cfsurvival)
+
 # Generate data
 set.seed(24601)
 n &lt;- 2000
@@ -123,15 +125,15 @@ n_test &lt;- 1000
 X_test &lt;- runif(n_test, 0, 2)
 T_test &lt;- exp(X_test + rnorm(n,0,1))
 
-# Running cfsurvival under completely independent censoring with c0 = 20 
-c0 &lt;- 20
+# Running cfsurvival under completely independent censoring with c0 = 30 
+c0 &lt;- 30
 pr_list &lt;- rep(0.5, n)
 pr_new_list &lt;- rep(0.5, n_test)
 
 # Use the Cox model
 res &lt;- cfsurv(x = X_test, c_list = c0, pr_list = pr_list, pr_new_list = pr_new_list,
              Xtrain = X, C = C, event = event, time = censored_T, 
-             alpha = 0.1, model = "cox")
+             alpha = 0.1, model = "aft")
 
 # Examine the result
 cat(sprintf("The coverage is %.3f.\n", mean(res &lt;= T_test)))</a></code></pre>

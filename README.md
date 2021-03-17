@@ -32,6 +32,8 @@ The following [R](https://www.r-project.org/) packages (version 4.0.2) packages 
 
 ## Usage example 
 ```{r}
+# Library the package
+library(cfsurvival)
 
 # Generate data
 set.seed(24601)
@@ -48,15 +50,15 @@ n_test <- 1000
 X_test <- runif(n_test, 0, 2)
 T_test <- exp(X_test + rnorm(n,0,1))
 
-# Running cfsurvival under completely independent censoring with c0 = 20 
-c0 <- 20
+# Running cfsurvival under completely independent censoring with c0 = 30 
+c0 <- 30
 pr_list <- rep(0.5, n)
 pr_new_list <- rep(0.5, n_test)
 
 # Use the Cox model
 res <- cfsurv(x = X_test, c_list = c0, pr_list = pr_list, pr_new_list = pr_new_list,
              Xtrain = X, C = C, event = event, time = censored_T, 
-             alpha = 0.1, model = "cox")
+             alpha = 0.1, model = "aft")
 
 # Examine the result
 cat(sprintf("The coverage is %.3f.\n", mean(res <= T_test)))

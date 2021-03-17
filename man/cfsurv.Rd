@@ -14,9 +14,8 @@ cfsurv(
   event,
   time,
   alpha = 0.05,
-  type = "quantile",
   seed = 24601,
-  model = "cox",
+  model = "aft",
   dist = "weibull",
   I_fit = NULL,
   ftol = 0.1,
@@ -45,7 +44,7 @@ cfsurv(
 
 \item{seed}{an integer random seed (default: 24601).}
 
-\item{model}{Options include "cox", "aft", "randomforest", "Powell", "Portnoy", "PengHuang", "distBoost", "quantBoost", "gpr". This determines the model used to fit the conformal score (default: "cox").}
+\item{model}{Options include "aft", "np", "randomforest", "Powell", "Portnoy", "PengHuang", "distBoost", "quantBoost", "gpr". This determines the model used to fit the conformal score (default: "cox").}
 
 \item{dist}{either "weibull", "exponential" or "gaussian" (default: "weibull"). The distribution of T used in the AFT model.}
 
@@ -70,13 +69,13 @@ n_test <- 1000
 X_test <- runif(n_test, 0, 2)
 T_test <- exp(X_test + rnorm(n,0,1))
 
-# Running cfsurvival with c0 = 20
-c0 <- 20
+# Running cfsurvival with c0 = 30
+c0 <- 30
 pr_list <- rep(0.5, n)
 pr_new_list <- rep(0.5, n_test)
 res <- cfsurv(x = X_test, c_list = c0, pr_list = pr_list, pr_new_list = pr_new_list,
              Xtrain = X, C = C, event = event, time = censored_T, 
-             alpha = 0.1, model = "cox")
+             alpha = 0.1, model = "aft")
 
 # Examine the result
 cat(sprintf("The coverage is \%.3f.\n", mean(res <= T_test)))

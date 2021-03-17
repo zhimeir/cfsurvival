@@ -31,8 +31,9 @@ Construct conformal predictive interval based on distributional boosting
 }
 \seealso{
 Other model: 
-\code{\link{cox_based}()},
+\code{\link{aft_based}()},
 \code{\link{distBoost_based}()},
+\code{\link{np_based}()},
 \code{\link{ph_based}()},
 \code{\link{portnoy_based}()},
 \code{\link{pow_based}()},
