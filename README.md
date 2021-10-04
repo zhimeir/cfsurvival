@@ -66,5 +66,5 @@ cat(sprintf("The coverage is %.3f.\n", mean(res <= T_test)))
 ## License 
 This packakge is is distributed under the MIT license.
 
-## Acknowledgement 
+## Acknowledgment 
 The implementation of the censored quantile random forest is adapted from https://github.com/AlexanderYogurt/censored_ExtremelyRandomForest.
