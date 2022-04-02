@@ -6,7 +6,7 @@
 
 selection_c <- function(X,C,event,time,alpha,
                         c_ref,weight_ref,
-                        model="cox",
+                        model="aft",
                         type="quantile",
                         dist="weibull"){
   
@@ -67,8 +67,8 @@ evaluate_length <- function(c,alpha,n,p,
   }
   x <- data_test[,colnames(data_test)%in%xnames]
   
-  if(model == "cox"){
-    bnd <- cox_based(x,c,alpha,
+  if(model == "aft"){
+    bnd <- aft_based(x,c,alpha,
                      data_fit,
                      data_calib,
                      type = "quantile",

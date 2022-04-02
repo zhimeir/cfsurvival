@@ -28,7 +28,7 @@ The following [R](https://www.r-project.org/) packages (version 4.0.2) packages 
  - [GauPro](https://cran.r-project.org/web/packages/GauPro/index.html)
  - [gbm](https://cran.r-project.org/web/packages/gbm/index.html)
  - [np](https://cran.r-project.org/web/packages/np/index.html)
- - [conTree](http://statweb.stanford.edu/~jhf/conTree/)
+ - [conTree](https://github.com/bnaras/conTree)
 
 ## Usage example 
 ```{r}
