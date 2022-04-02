@@ -71,7 +71,6 @@ evaluate_length <- function(c,alpha,n,p,
     bnd <- aft_based(x,c,alpha,
                      data_fit,
                      data_calib,
-                     type = "quantile",
                      dist,
                      weight_calib,
                      weight_new)
