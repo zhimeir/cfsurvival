@@ -60,7 +60,7 @@ distBoost_based <- function(x,c,alpha,
     xdf <- surv_data_fit[,colnames(surv_data_fit)%in%xnames]
   }
   mdlrb <- modtrast(xdf, surv_data_fit$censored_T,
-                    resamp_T, min.node = NULL)
+                    resamp_T)
 
   ## obtain the score of the calibration data
   surv_data_calib <- data_calib
