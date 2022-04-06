@@ -59,7 +59,7 @@ quantBoost_based <- function(x,c,alpha,
   }else{
     xdf <- data_fit[,colnames(data_fit)%in%xnames]
   }
-  mdlrb <- modtrast(xdf, data_fit$censored_T, resamp_T, min.node = NULL)
+  mdlrb <- modtrast(xdf, data_fit$censored_T, resamp_T)
 
   ########################################
   ## obtain the score of the calibration data
